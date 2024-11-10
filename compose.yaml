@@ -1,0 +1,43 @@
+services:
+  micro:
+    image: snowplow/snowplow-micro:2.1.2
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config:/config
+      - ./data:/data
+    entrypoint: ["sh", "-c", "/opt/snowplow/bin/snowplow-micro --collector-config /config/micro.conf --iglu /config/iglu.json --output-tsv > /data/micro.tsv"]
+
+  snowbridge:
+    build: snowbridge
+    environment:
+      - SNOWBRIDGE_CONFIG_FILE=/config/snowbridge-config.hcl
+    volumes:
+      - ./config:/config
+      - ./data:/app/data
+
+  kafka:
+    image: apache/kafka-native
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    ports:
+      - 8080:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: "true"
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+    depends_on:
+      - kafka

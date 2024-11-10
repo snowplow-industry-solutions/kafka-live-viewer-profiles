@@ -1,0 +1,124 @@
+= Snowplow PoC
+Paulo Jeronimo <paulo@oso.sh>
+:icons: font
+:idprefix:
+:idseparator: -
+:numbered:
+:sectanchors:
+:source-highlighter: rouge
+:toc: left
+ifdef::backend-pdf[]
+:toc-title!:
+:toc: macro
+endif::[]
+ifdef::backend-html5[]
+:nofooter:
+endif::[]
+// Other attributes
+:DatabricksAccelerator: <<databricks-accelerator,Databricks Accelerator>>
+:SnowplowMicro: https://docs.snowplow.io/docs/testing-debugging/snowplow-micro/[Snowplow Micro]
+:Snowbridge: https://docs.snowplow.io/docs/destinations/forwarding-events/snowbridge/[Snowbridge]
+:Kinesis: https://aws.amazon.com/kinesis/[Kinesis]
+:Kafka: https://kafka.apache.org/[Kafka]
+:KafkaUI: https://github.com/kafbat/kafka-ui[Kafka UI]
+:KafkaConnector: https://docs.confluent.io/platform/current/connect/kafka_connectors.html[Kafka Connector]
+
+ifdef::backend-pdf[]
+[.text-center]
+*Author: {author} ({email})* +
+*link:README.html[HTML version]*
+
+****
+toc::[]
+****
+endif::[]
+ifdef::backend-html5[]
+[.text-center]
+*link:README.pdf[PDF version]*
+endif::[]
+
+== Current status
+
+Right now, I'm working on making this PoC work on my machine (running all inside a Windows/WSL2 environment) without worrying about setting up an infrastructure to run everything as a {DatabricksAccelerator}, as requested in link:requirements.pdf[the document]. But, this will be my next step (<<databricks-setup>>) and will be delivered son.
+
+=== What is already in operation at this point?
+
+A sequence of steps, defined below, to permit you to run Snowplow, via Docker Compose, sending data to Kafka through via {SnowplowMicro} and {Snowbridge}.
+
+These steps demonstrate how to test, locally, the sending of events https://snowplow-incubator.github.io/snowplow-javascript-tracker-examples/media/[from this application] (but <<step3,running it locally>>) until its consumption, via {KafkaConnector}, by an application written in Java 21.
+
+=== Limitations
+
+. In this version, as I am using {SnowplowMicro} to generate events, and it does not have native support for generating events for {Kinesis}, this is not addressed.
+
+=== TODO (or [line-through]#DONE#)
+
+. [[java-develop]] Create a Java 21 project (using {KafkaConnector}), to consume messages from Kafka. *<- java-develop*
+. Install Snowplow Community on AWS.
+. Configure Snowplow to send messages to {Kinesis}.
+. [[databricks-setup]] Create the {DatabricksAccelerator}. *<- databricks-setup*
+. Create a entire Docker Compose infrastructure to run components locally.
+.. [line-through]#Configure a {SnowplowMicro} container#.
+.. [line-through]#Configure a {Snowbridge} container to sent events to stdout#.
+.. Configure a Node.js container to run the media app.
+.. Configure the {Snowbridge} container to sent events to Kafka.
+.. [line-through]#Configure a {Kafka} container#.
+.. [line-through]#Configure a {KafkaUI} container#.
+.. Configure a Java container to run the Kafka Connector app.
+. [line-through]#Create a initial documentation (this README)#.
+
+== Steps
+:numbered!:
+
+[[step0]]
+=== Step 0 -> Clone this project and cd to it.
+
+[[step1]]
+=== Step 1 -> Start the containers
+
+[,console]
+----
+$ docker compose build
+$ docker compose up
+----
+
+[[step2]]
+=== Step 2 -> Open http://localhost:9090/micro/ui to watch events
+
+To count the number of events sent by snowbridge, type:
+
+[,console]
+----
+$ ./data/snowbridge.sent.sh
+----
+
+[[step3]]
+=== Step 3 -> Open http://localhost:3000 to generate the events
+
+[[step4]]
+=== Step 4 -> Open http://localhost:8080 to see the events exported to Kafka UI.
+
+[[step5]]
+=== Step 5 -> See the Java application running
+
+TODO (<<java-develop>>).
+
+[[step6]]
+=== Step 6 -> Restart and clean up
+
+[,console]
+----
+$ docker compose down
+----
+
+[,console]
+----
+$ ./data/clean.sh all
+----
+
+:numbered:
+== References
+
+. [[databricks-accelerator]] *databricks-acelerator*:
+.. https://github.com/databricks-industry-solutions/
+.. https://www.databricks.com/solutions/accelerators

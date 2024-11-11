@@ -1,8 +1,13 @@
 services:
+  js-tracker:
+    build: js-tracker
+    ports:
+      - 3000:3000
+        
   micro:
     image: snowplow/snowplow-micro:2.1.2
     ports:
-      - "9090:9090"
+      - 9090:9090
     volumes:
       - ./config:/config
       - ./data:/data
@@ -19,7 +24,7 @@ services:
   kafka:
     image: apache/kafka-native
     ports:
-      - "9092:9092"
+      - 9092:9092
     environment:
       KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
       KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://kafka:9093

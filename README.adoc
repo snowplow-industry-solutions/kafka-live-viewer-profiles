@@ -3,6 +3,7 @@ Paulo Jeronimo <paulo@oso.sh>
 :icons: font
 :idprefix:
 :idseparator: -
+:imagesdir: images
 :numbered:
 :sectanchors:
 :source-highlighter: rouge
@@ -45,7 +46,7 @@ Right now, I'm working on making this PoC work on my machine (running all inside
 
 A sequence of steps, defined below, to permit you to run Snowplow, via Docker Compose, sending data to Kafka through via {SnowplowMicro} and {Snowbridge}.
 
-These steps demonstrate how to test, locally, the sending of events https://snowplow-incubator.github.io/snowplow-javascript-tracker-examples/media/[from this application] (but <<step3,running it locally>>) until its consumption, via {KafkaConnector}, by an application written in Java 21.
+These steps demonstrate how to test, locally, the sending of events https://snowplow-incubator.github.io/snowplow-javascript-tracker-examples/media/[from this application] (but <<step2,running it locally>>) until its consumption, via {KafkaConnector}, by an application written in Java 21.
 
 === Limitations
 
@@ -58,20 +59,26 @@ These steps demonstrate how to test, locally, the sending of events https://snow
 . Configure Snowplow to send messages to {Kinesis}.
 . [[databricks-setup]] Create the {DatabricksAccelerator}. *<- databricks-setup*
 . Create a entire Docker Compose infrastructure to run components locally.
-.. [line-through]#Configure a {SnowplowMicro} container#.
-.. [line-through]#Configure a {Snowbridge} container to sent events to stdout#.
-.. Configure a Node.js container to run the media app.
+.. [line-through]#Configure a {SnowplowMicro} container#. *<- DONE*
+.. [line-through]#Configure a {Snowbridge} container to sent events to stdout#. *<- DONE*
+.. [line-through]#Configure a Node.js container to run the media app#. *<- DONE*
 .. Configure the {Snowbridge} container to sent events to Kafka.
-.. [line-through]#Configure a {Kafka} container#.
-.. [line-through]#Configure a {KafkaUI} container#.
+.. [line-through]#Configure a {Kafka} container#. *<- DONE*
+.. [line-through]#Configure a {KafkaUI} container#. *<- DONE*
 .. Configure a Java container to run the Kafka Connector app.
-. [line-through]#Create a initial documentation (this README)#.
+. [line-through]#Create a initial documentation (this README)#. *<- DONE*
 
 == Steps
 :numbered!:
 
 [[step0]]
 === Step 0 -> Clone this project and cd to it.
+
+[,console]
+----
+$ repo=git@github.com:osodevops/snowplow-live-viewer-profile-generator.git
+$ git clone $repo && cd $(basename $repo .git)
+----
 
 [[step1]]
 === Step 1 -> Start the containers
@@ -83,7 +90,26 @@ $ docker compose up
 ----
 
 [[step2]]
-=== Step 2 -> Open http://localhost:9090/micro/ui to watch events
+=== Step 2 -> Open http://localhost:3000 to generate the events
+
+After open this link, configure the collector endpoint:
+
+image:js-tracker-1.png[]
+
+Open the "Custom media tracking demo":
+
+image:js-tracker-2.png[]
+
+You will get a page like this one:
+
+image:js-tracker-3.png[]
+
+[[step3]]
+=== Step 3 -> Open http://localhost:9090/micro/ui to watch events
+
+You will get a page like this one:
+
+image:micro-ui.png[]
 
 To count the number of events sent by snowbridge, type:
 
@@ -91,9 +117,6 @@ To count the number of events sent by snowbridge, type:
 ----
 $ ./data/snowbridge.sent.sh
 ----
-
-[[step3]]
-=== Step 3 -> Open http://localhost:3000 to generate the events
 
 [[step4]]
 === Step 4 -> Open http://localhost:8080 to see the events exported to Kafka UI.

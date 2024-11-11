@@ -28,23 +28,21 @@ do
     then
         timestamp=$(date +%s)
         start=$(( $(<$MSG_SENT_FILE) + 1 ))
-        snowbridge_log=$SNOWBRIDGE_LOG.$timestamp
-        {
-            sed -n "$start,\$p" $DATA_TSV |
-            snowbridge 2>&1 |
-            tee -a $snowbridge_log |
-            grep -oP '(?<=,|^)MsgSent:\K\d+' > $MSG_SENT_FILE
-        } || {
-            echo -e snowbridge reported a failure: "\n$(<$snowbridge_log)"
-            send_zero_to $MSG_SENT_FILE
-        }
-        total_sent="$(<$MSG_SENT_FILE)"
+        log=$SNOWBRIDGE_LOG.$timestamp
+        if ! total_sent=$(sed -n "$start,\$p" $DATA_TSV | snowbridge 2>&1 | tee -a $log | grep -oP '(?<=,|^)MsgSent:\K\d+')
+        then
+            echo -e At $timestamp, there was a failure: "\n$(<$log)"
+            continue
+        fi
         if [ $total_sent -gt 0 ]
         then
             echo At $timestamp, $total_sent messages were processed from $DATA_TSV starting from line $start.
-            echo "$timestamp,$total_sent" >> $SNOWBRIDGE_CSV
-            echo $(( start - 1 + total_sent )) > $MSG_SENT_FILE
+            echo $total_sent > $MSG_SENT_FILE
+        else
+            continue
         fi
+        echo "$timestamp,$start,$total_sent" >> $SNOWBRIDGE_CSV
+        echo $(( start - 1 + total_sent )) > $MSG_SENT_FILE
     fi
     sleep $PROCESSOR_SLEEP
 done

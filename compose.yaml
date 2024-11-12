@@ -95,6 +95,20 @@ services:
     depends_on:
       - kafka
 
+  java-consumer:
+    build: java-consumer
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9093
+    depends_on:
+      - kafka
+      - kafka-init
+    healthcheck:
+      test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server kafka:9093 --list | grep -q snowplow-enriched-good"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: on-failure
+
 volumes:
   zookeeper_data:
   zookeeper_logs:

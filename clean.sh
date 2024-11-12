@@ -15,3 +15,5 @@ do
 done
 
 ./data/clean.sh all
+
+(cd java-consumer; ./gradlew clean) || :

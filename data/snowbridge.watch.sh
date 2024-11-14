@@ -6,7 +6,7 @@ interval=${interval:-5}
 length=${length:-3}
 csv=./snowbridge.csv
 
-[ -f "$csv" ] || echo "0,0,0" > $csv
+[ -f "$csv" ] || echo "0,0,0,0" > $csv
 
 while true
 do
@@ -14,6 +14,8 @@ do
     echo Last $length snowbridge calls:
     tail -n $length $csv
     echo
-    echo Total processed: $(./snowbridge.sent.sh) events.
+    counters=$(./snowbridge.counters.sh)
+    echo Good Events Sent: $(cut -d, -f1 <<< $counters).
+    echo Bad Events Sent: $(cut -d, -f2 <<< $counters).
     sleep $interval
 done

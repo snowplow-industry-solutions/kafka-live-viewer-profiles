@@ -2,5 +2,5 @@
 set -eou pipefail
 cd $(dirname $0)
 
-echo Stpoting containers ...
+echo Stoping containers ...
 docker compose down

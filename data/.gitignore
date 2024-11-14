@@ -1,5 +1,4 @@
 micro.tsv
-msg_sent
 snowbridge*
-!snowbridge.sent.sh
+!snowbridge.counters.sh
 !snowbridge.watch.sh

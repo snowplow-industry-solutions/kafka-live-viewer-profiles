@@ -6,7 +6,7 @@ if [ -t 0 ]
 then
     if [ $# -eq 0 ]
     then
-        sed -n '3,13p' $script |
+        sed -n '/^# HELP-BEGIN$/{:a;n;/^# HELP-END$/q;p;ba}' $script |
         sed -e 's/^# //g' -e 's/^#$//g' -e 's/\.awk/.sh/g'
     else
         ./$script "$@"

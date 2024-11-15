@@ -1,16 +1,30 @@
 #!/usr/bin/awk -f
-#
+
+# HELP-BEGIN
 # Usage examples:
-#
-# $ # Print field numbers for each line:
+
+# Print field numbers for each line:
 # $ ./tsv-debug.awk samples/micro.1.tsv
 # $ ./tsv-debug.awk < samples/micro.1.tsv
-#
-# $ # Use header.tsv to print field names instead of field numbers:
+
+# Use header.tsv to print field names instead of field numbers:
 # $ ./tsv-debug.awk --print-field-names samples/micro.1.tsv
-#
-# $ # Print only 3 lines (10,11,12) from the specified file:
+
+# Print only 3 lines (10,11,12) from the specified file:
 # $ sed -n '10,12p' samples/micro.1.tsv | ./tsv-debug.awk --print-field-names 
+
+# Put all unstruct_event in a events variable:
+# $ events=$(./tsv-debug.awk --print-field-names samples/micro.1.tsv | grep -n unstruct_event) 
+
+# $ echo "$events" # <- Show the events
+# $ grep -E '(error_event|play_event)' <<< "$events" # <- Show all error_event or play_event
+# $ grep -m 1 play_event <<< "$events" # <- Get the first occurence of a play_event
+# $ !! | cut -d: -f3- | jq # <- Print the last line in JSON format
+
+# Show the order of ocurrence of events in time:
+# $ echo "$events" | grep -v 'unstruct_event:$' | sed 's,.*media/\(.*event\)/\(.*\),\1,g' 
+
+# HELP-END
 
 BEGIN {
     FS = "\t"

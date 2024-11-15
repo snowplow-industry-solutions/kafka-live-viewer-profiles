@@ -1,7 +1,17 @@
 #!/usr/bin/awk -f
 #
-# Usage: ./tsv-debug.sh [--print-field-names] micro.tsv
+# Usage examples:
 #
+# $ # Print field numbers for each line:
+# $ ./tsv-debug.awk samples/micro.1.tsv
+# $ ./tsv-debug.awk < samples/micro.1.tsv
+#
+# $ # Use header.tsv to print field names instead of field numbers:
+# $ ./tsv-debug.awk --print-field-names samples/micro.1.tsv
+#
+# $ # Print only 3 lines (10,11,12) from the specified file:
+# $ sed -n '10,12p' samples/micro.1.tsv | ./tsv-debug.awk --print-field-names 
+
 BEGIN {
     FS = "\t"
     print_fields = 0

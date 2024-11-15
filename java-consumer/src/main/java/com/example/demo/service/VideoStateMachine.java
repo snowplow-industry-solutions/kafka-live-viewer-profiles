@@ -13,7 +13,7 @@ public class VideoStateMachine {
         COMPLETED_VIDEO
     }
 
-    private final Map<String, State> userVideoStates = new HashMap<>();
+    private final Map<String, State> viewerVideoStates = new HashMap<>();
 
     private final Map<State, Function<String, State>> stateTransitions = Map.of(
         State.WATCHING_VIDEO, this::handleWatchingVideo,
@@ -24,7 +24,7 @@ public class VideoStateMachine {
 
     public State handleEvent(String viewerId, String videoId, String event) {
         String key = generateKey(viewerId, videoId);
-        return userVideoStates.compute(key, (k, currentState) -> {
+        return viewerVideoStates.compute(key, (k, currentState) -> {
             if (currentState == null) {
                 currentState = State.WATCHING_VIDEO;
             }
@@ -37,6 +37,7 @@ public class VideoStateMachine {
             case "pause_event" -> State.PAUSED_VIDEO;
             case "ad_break_start_event" -> State.WATCHING_AD;
             case "end_event" -> State.COMPLETED_VIDEO;
+            case "ping_event" -> State.WATCHING_VIDEO;
             default -> State.WATCHING_VIDEO;
         };
     }
@@ -49,6 +50,7 @@ public class VideoStateMachine {
         return switch (event) {
             case "ad_break_end_event" -> State.WATCHING_VIDEO;
             case "end_event" -> State.COMPLETED_VIDEO;
+            case "ping_event" -> State.WATCHING_AD;
             default -> State.WATCHING_AD;
         };
     }
@@ -58,7 +60,6 @@ public class VideoStateMachine {
     }
 
     public State getCurrentState(String viewerId, String videoId) {
-        return userVideoStates.getOrDefault(generateKey(viewerId, videoId), State.WATCHING_VIDEO);
+        return viewerVideoStates.getOrDefault(generateKey(viewerId, videoId), State.WATCHING_VIDEO);
     }
 }
-

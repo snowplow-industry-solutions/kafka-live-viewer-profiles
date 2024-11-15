@@ -1,13 +1,14 @@
 package com.example.demo.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VideoStateMachineTest {
 
     private VideoStateMachine machine;
-    private String viewerId = "user123";
+    private String viewerId = "viewer123";
     private String videoId = "video456";
 
     @BeforeEach
@@ -56,6 +57,33 @@ public class VideoStateMachineTest {
     public void testEndEventFromWatchingAd() {
         machine.handleEvent(viewerId, videoId, "ad_break_start_event");
         machine.handleEvent(viewerId, videoId, "end_event");
+        assertEquals(VideoStateMachine.State.COMPLETED_VIDEO, machine.getCurrentState(viewerId, videoId));
+    }
+
+    @Test
+    public void testPingEventInWatchingVideo() {
+        machine.handleEvent(viewerId, videoId, "ping_event");
+        assertEquals(VideoStateMachine.State.WATCHING_VIDEO, machine.getCurrentState(viewerId, videoId));
+    }
+
+    @Test
+    public void testPingEventInWatchingAd() {
+        machine.handleEvent(viewerId, videoId, "ad_break_start_event");
+        machine.handleEvent(viewerId, videoId, "ping_event");
+        assertEquals(VideoStateMachine.State.WATCHING_AD, machine.getCurrentState(viewerId, videoId));
+    }
+
+    @Test
+    public void testPingEventDoesNotAffectPausedVideo() {
+        machine.handleEvent(viewerId, videoId, "pause_event");
+        machine.handleEvent(viewerId, videoId, "ping_event");
+        assertEquals(VideoStateMachine.State.PAUSED_VIDEO, machine.getCurrentState(viewerId, videoId));
+    }
+
+    @Test
+    public void testPingEventDoesNotAffectCompletedVideo() {
+        machine.handleEvent(viewerId, videoId, "end_event");
+        machine.handleEvent(viewerId, videoId, "ping_event");
         assertEquals(VideoStateMachine.State.COMPLETED_VIDEO, machine.getCurrentState(viewerId, videoId));
     }
 }

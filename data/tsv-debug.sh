@@ -9,8 +9,8 @@ then
         sed -n '/^# HELP-BEGIN$/{:a;n;/^# HELP-END$/q;p;ba}' $script |
         sed -e 's/^# //g' -e 's/^#$//g' -e 's/\.awk/.sh/g'
     else
-        ./$script "$@"
+        ./${script##*/} "$@"
     fi
 else
-    ./$script "$@" <<< "$(</dev/stdin)"
+    ./${script##*/} "$@" <<< "$(</dev/stdin)"
 fi

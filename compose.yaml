@@ -16,6 +16,7 @@ services:
   snowbridge:
     build: snowbridge
     environment:
+      - JS_SCRIPT_PATH=/config/video-data.js
       - SNOWBRIDGE_CONFIG_FILE=/config/snowbridge-config.hcl
     volumes:
       - ./config:/config

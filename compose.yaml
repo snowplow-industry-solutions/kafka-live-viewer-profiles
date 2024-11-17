@@ -16,7 +16,7 @@ services:
   snowbridge:
     build: snowbridge
     environment:
-      - CALLER_SLEEP=3
+      - CALLER_SLEEP=1
       - JS_SCRIPT_PATH=/config/video-data.js
       - SNOWBRIDGE_CONFIG_FILE=/config/snowbridge-config.hcl
     volumes:

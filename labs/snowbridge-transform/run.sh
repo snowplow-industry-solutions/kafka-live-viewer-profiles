@@ -24,6 +24,7 @@ script=script.$script_id.js
 [ -f $script ] || { echo File $script not found. Aborting!; exit 1; }
 micro_id=${micro_id:-1}
 micro_tsv=${micro_tsv:-../../data/samples/micro.$micro_id.tsv}
+snowbridge_image=snowplow/snowbridge:3.0.0
 
 echo Running snowbridge configured with $script.
 
@@ -43,7 +44,7 @@ cat data.tsv | docker run --rm -i \
     --env ACCEPT_LIMITED_USE_LICENSE=yes \
     --mount type=bind,source=$(pwd)/config.hcl,target=/tmp/config.hcl \
     --mount type=bind,source=$(pwd)/script.js,target=/tmp/script.js \
-    snowplow/snowbridge:2.4.2 > output.txt
+    $snowbridge_image > output.txt
 #end::docker[]
 
 case "$script_id" in
@@ -63,3 +64,11 @@ ln -sf $script script.js
 echo Copying output.$script_id.txt from output.txt and linking this file to it ...
 cat output.txt > output.$script_id.txt
 ln -sf output.$script_id.txt output.txt
+
+! [ "$script_id" = 6 ] || {
+    export input=output.$script_id.txt
+    output=events-from-snowbridge.txt
+    echo Transforming $input to $output via ./events-from-snowbrigde.sh ...
+    ./events-from-snowbridge.sh > $output
+    echo Calculating $output\'s sha256sum: $(sha256sum $output | cut -d' ' -f1)
+}

@@ -6,7 +6,10 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class WebSocketHandler implements org.springframework.web.socket.WebSocketHandler {
 
     private final Set<WebSocketSession> sessions = Collections.synchronizedSet(new HashSet<>());
@@ -14,7 +17,7 @@ public class WebSocketHandler implements org.springframework.web.socket.WebSocke
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         sessions.add(session);
-        System.out.println("New client connected: " + session.getId());
+        log.debug("New client connected: " + session.getId());
     }
 
     @Override
@@ -23,14 +26,14 @@ public class WebSocketHandler implements org.springframework.web.socket.WebSocke
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        System.out.println("Transport error for client " + session.getId() + ": " + exception.getMessage());
+        log.error("Transport error for client " + session.getId() + ": " + exception.getMessage());
         sessions.remove(session);
         session.close();
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        System.out.println("Client disconnected: " + session.getId());
+        log.debug("Client disconnected: " + session.getId());
         sessions.remove(session);
     }
 
@@ -46,11 +49,10 @@ public class WebSocketHandler implements org.springframework.web.socket.WebSocke
                     try {
                         session.sendMessage(new TextMessage(message));
                     } catch (Exception e) {
-                        System.out.println("Error sending message to client " + session.getId() + ": " + e.getMessage());
+                        log.error("Error sending message to client " + session.getId() + ": " + e.getMessage());
                     }
                 }
             }
         }
     }
 }
-

@@ -8,9 +8,11 @@ import com.example.demo.websocket.WebSocketHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class KafkaConsumerService {
 
     private final WebSocketHandler webSocketHandler;
@@ -18,14 +20,11 @@ public class KafkaConsumerService {
 
     @KafkaListener(topics = "${spring.kafka.consumer.topics}", groupId = "${spring.kafka.consumer.group-id}")
     public void listen(String message) {
-        System.out.println("Received message from Kafka: " + message);
 
         try {
             VideoEvent videoEvent = objectMapper.readValue(message, VideoEvent.class);
-            System.out.println("Received Video Event: " + videoEvent);
         } catch (Exception e) {
-            System.err.println("Error processing message: " + message);
-            e.printStackTrace();
+            log.error("Error processing message: " + message, e);
         }
 
         webSocketHandler.broadcast(message);

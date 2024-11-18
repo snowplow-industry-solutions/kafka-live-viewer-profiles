@@ -18,4 +18,4 @@ yes | docker volume prune || :
 
 ./data/clean.sh all
 
-(cd java-consumer; ./gradlew clean) || :
+#(cd java-consumer; ./gradlew clean) || :

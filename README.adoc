@@ -1,4 +1,4 @@
-= Snowplow PoC
+= Snowplow Live Viewer Profile
 Paulo Jeronimo <paulo@oso.sh>
 :icons: font
 :idprefix:
@@ -23,10 +23,15 @@ endif::[]
 :Kafka: https://kafka.apache.org/[Kafka]
 :KafkaUI: https://github.com/kafbat/kafka-ui[Kafka UI]
 :KafkaConnector: https://docs.confluent.io/platform/current/connect/kafka_connectors.html[Kafka Connector]
+:DynamoDB: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html[DynamoDB]
+:LocalStack: https://www.localstack.cloud/[LocalStack]
+:Thymeleaf: https://docs.spring.io/spring-framework/reference/web/webmvc-view/mvc-thymeleaf.html[Thymeleaf]
+:WebSockets: https://docs.spring.io/spring-framework/reference/web/websocket.html[WebSockets]
 
 ifdef::backend-pdf[]
 [.text-center]
 *Author: {author} ({email})* +
+*Git commit with doc: {git-commit}* +
 *link:README.html[HTML version]*
 
 ****
@@ -35,58 +40,86 @@ toc::[]
 endif::[]
 ifdef::backend-html5[]
 [.text-center]
-*link:README.pdf[PDF version]*
+*link:README.pdf[PDF version]* +
+*Git commit with doc: {git-commit}*
 endif::[]
 
-== Current status
+<<<
+== Current status (as of {docdate})
 
-Right now, I'm working on making this PoC work on my machine (running all inside a Windows/WSL2 environment) without worrying about setting up an infrastructure to run everything as a {DatabricksAccelerator}, as requested in link:requirements.pdf[the document]. But, this will be my next step (<<databricks-setup>>) and will be delivered son.
+Right now, this project can work my machine (running all inside a Windows/WSL2 environment) without worrying about setting up an infrastructure to run everything as a {DatabricksAccelerator}, as requested in link:requirements.pdf[the document]. But, this will be my next step (<<databricks-setup>>) and will be delivered soon (<<question-databricks,question here>>).
 
 === What is already in operation at this point?
 
 A sequence of steps, defined below, to permit you to run Snowplow, via Docker Compose, sending data to Kafka through via {SnowplowMicro} and {Snowbridge}.
 
-These steps demonstrate how to test, locally, the sending of events https://snowplow-incubator.github.io/snowplow-javascript-tracker-examples/media/[from this application] (but <<step2,running it locally>>) until its consumption, via {KafkaConnector}, by an application written in Java 21.
+These steps demonstrate how to test, locally, the sending of events https://snowplow-incubator.github.io/snowplow-javascript-tracker-examples/media/[from this application] (but <<step1,running it locally>>) until its consumption, via {KafkaConnector}, by an application written in Java 21.
 
 === Limitations
 
-. In this version, as I am using {SnowplowMicro} to generate events, and it does not have native support for generating events for {Kinesis}, this is not addressed.
+. [[limitation1]] In this version, as I am using {SnowplowMicro} to generate events, and it does not have native support for generating events for {Kinesis}, this is not addressed.
 
+<<<
 === TODO (or [line-through]#DONE#)
 
-. [[java-develop]] Create a Java 21 project (using {KafkaConnector}), to consume messages from Kafka. *<- java-develop*
-. Install Snowplow Community on AWS.
-. Configure Snowplow to send messages to {Kinesis}.
-. [[databricks-setup]] Create the {DatabricksAccelerator}. *<- databricks-setup*
 . Create a entire Docker Compose infrastructure to run components locally.
 .. [line-through]#Configure a {SnowplowMicro} container#. *<- DONE*
-.. [line-through]#Configure a {Snowbridge} container to sent events to stdout#. *<- DONE*
+.. [[snowbridge-caller]] [line-through]#Create a customized image to call {Snowbridge} and send events to it by reading data from a micro.tsv file#. *<- DONE* *<- snowbridge-caller*
 .. [line-through]#Configure a Node.js container to run the media app#. *<- DONE*
-.. Configure the {Snowbridge} container to sent events to Kafka.
+.. [line-through]#Configure the {Snowbridge} container to sent events to Kafka.# *<- DONE*
 .. [line-through]#Configure a {Kafka} container#. *<- DONE*
 .. [line-through]#Configure a {KafkaUI} container#. *<- DONE*
-.. Configure a Java container to run the Kafka Connector app.
-. [line-through]#Create a initial documentation (this README)#. *<- DONE*
+.. Configure a {DynamoDB} container.
+.. [line-through]#Create a Java 21 application to consume messages from Kafka#. *<- DONE*
+... [line-through]#Consume messages from Kafka (coming from snowbridge)#. *<- DONE*
+... Record messages received to {DynamoDB}.
+... [line-through]#Determine a state from a viewer using a video state machine#. *<- DONE*
+.. [line-through]#Create a Docker image to run the Java app#. *<- DONE*
+. [line-through]#Create and keep this documentation updated#. *<- DONE*
+. Maybe:
+.. Refactor the code to make it cleaner and create more test code.
+.. Separate the frontend code from the Java backend.
+... So the Spring backend will skip to use {Thymeleaf} and be more focused on manage backend messages (Kafka and {WebSockets}).
+... Since it is only a static page, it can be in a separate container managed by Ngnix (as an example).
+. Configure Snowplow to send messages to {Kinesis} and test it locally with {LocalStack}. *<- <<question-localstack,question here>>*
+. [[databricks-setup]] Create a {DatabricksAccelerator}. *<-<<question-databricks,question here>>*
 
-== Steps
+<<<
+.My questions (doubts):
+****
+[[question-localstack]] question-localstack) Do we need to create a version of this project to run with {LocalStack}?::
+Reason: this is a way to insert {Kinesis} in this solution and continue to test it locally. Currenty, to skip <<limitation1,this limitation>> and use only Snowplow Micro in this version, I created the <<snowbridge-caller>> project. +
+https://osodevops.slack.com/archives/C07RAQVAAJH/p1731493555873649?thread_ts=1731453220.008699&cid=C07RAQVAAJH[This was one of the things I chatted with Trent].
+
+[[question-databricks]] question-databricks) Do we need to create a version of this project to run inside Databricks (as a real <<databricks-accelerator>>)?::
+****
+
+<<<
+== Steps (to run this application as is)
 :numbered!:
 
 [[step0]]
-=== Step 0 -> Clone this project and cd to it.
+=== Step 0 -> Prerequisites
 
+. Start a Ubuntu Linux (it can be running on a WSL2 environment) terminal.
+. Make sure you have docker (and docker compose) installed.
+. Clone this project with Git and cd to it.
++
+[[github]]
 [,console]
 ----
 $ repo=git@github.com:osodevops/snowplow-live-viewer-profile-generator.git
 $ git clone $repo && cd $(basename $repo .git)
 ----
 
+NOTE: You don't need Java or Node.js configured on your machine to follow the steps below.
+
 [[step1]]
 === Step 1 -> Start the containers
 
 [,console]
 ----
-$ docker compose build
-$ docker compose up
+$ ./up.sh
 ----
 
 [[step2]]
@@ -105,43 +138,74 @@ You will get a page like this one:
 image:js-tracker-3.png[]
 
 [[step3]]
-=== Step 3 -> Open http://localhost:9090/micro/ui to watch events
+=== Step 3 -> Open http://localhost:8180 to see the "Snowplow Live Viewer Profile" UI.
+
+See details on the <<video2>>.
+
+[[step4]]
+=== Step 4 -> Open http://localhost:9090/micro/ui to watch events
 
 You will get a page like this one:
 
 image:micro-ui.png[]
 
-To count the number of events sent by snowbridge, type:
+[[step5]]
+=== Step 5 - Open a terminal to watch events sent by snowbridge
+
+To watch the number of events sent by snowbridge, type:
 
 [,console]
 ----
-$ ./data/snowbridge.sent.sh
+$ ./data/snowbridge.watch.sh
 ----
-
-[[step4]]
-=== Step 4 -> Open http://localhost:8080 to see the events exported to Kafka UI.
-
-[[step5]]
-=== Step 5 -> See the Java application running
-
-TODO (<<java-develop>>).
 
 [[step6]]
-=== Step 6 -> Restart and clean up
+=== Step 6 (optional) -> Open http://localhost:8080 to see the events exported to {KafkaUI}.
+
+See details on the <<video1>>.
+
+[[step7]]
+=== Step 7 -> Stop and Restart
+
+To stop all the containers:
 
 [,console]
 ----
-$ docker compose down
+$ ./down.sh
 ----
+
+To restart this lab:
 
 [,console]
 ----
-$ ./data/clean.sh all
+$ ./restart.sh
 ----
+
+[WARNING]
+.Warnings:
+====
+. Make sure you call the script `down.sh` before calling `restart.sh`.
+. The script `restart.sh` will call the script `clean.sh` as its firts step.
+. The script `clean.sh` will destroy any data generated by these containers.
+====
 
 :numbered:
+<<<
 == References
 
 . [[databricks-accelerator]] *databricks-acelerator*:
 .. https://github.com/databricks-industry-solutions/
 .. https://www.databricks.com/solutions/accelerators
+
+== Videos demonstrating the with status of this project
+
+* [[video2]] *video2 ->* https://www.youtube.com/watch?v=CZ5gGOPkGtY -> Published on YouTube (unlisted) on Nov 18, 2024.
+* [[video1]] *video1 ->* https://www.youtube.com/watch?v=94U1-Ryjv20 -> Published on YouTube (unlisted) on Nov 11, 2024.
+
+<<<
+== About this document
+
+This document is written in AsciiDoc format.
+Its source code is the file `README.adoc` (inside the GitHub repo of <<github,the project>>).
+
+The script `README.sh` generates the files `README.html` and `README.pdf`.

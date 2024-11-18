@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.springframework.stereotype.Service;
+
+import com.example.demo.model.VideoEvent;
+
+@Service
 public class VideoStateMachine {
 
     public enum State {
@@ -22,13 +27,12 @@ public class VideoStateMachine {
         State.COMPLETED_VIDEO, state -> State.COMPLETED_VIDEO
     );
 
-    public State handleEvent(String viewerId, String videoId, String event) {
-        String key = generateKey(viewerId, videoId);
-        return viewerVideoStates.compute(key, (k, currentState) -> {
+    public State handleEvent(VideoEvent videoEvent) {
+        return viewerVideoStates.compute(videoEvent.viewerId(), (k, currentState) -> {
             if (currentState == null) {
                 currentState = State.WATCHING_VIDEO;
             }
-            return stateTransitions.get(currentState).apply(event);
+            return stateTransitions.get(currentState).apply(videoEvent.eventName());
         });
     }
 
@@ -55,11 +59,11 @@ public class VideoStateMachine {
         };
     }
 
-    private String generateKey(String viewerId, String videoId) {
-        return viewerId + "_" + videoId;
+    public State getCurrentState(String viewerId) {
+        return viewerVideoStates.getOrDefault(viewerId, State.WATCHING_VIDEO);
     }
 
-    public State getCurrentState(String viewerId, String videoId) {
-        return viewerVideoStates.getOrDefault(generateKey(viewerId, videoId), State.WATCHING_VIDEO);
+    public State getCurrentState(VideoEvent videoEvent) {
+        return getCurrentState(videoEvent.viewerId());
     }
 }

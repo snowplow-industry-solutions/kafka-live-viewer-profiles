@@ -10,6 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -72,7 +73,8 @@ class KafkaConsumerServiceTest {
                 "143f9cb9-3db9-4e99-8d67-c8aea075d190",
                 0,
                 4,
-                0
+                0,
+                VideoStateMachine.State.WATCHING_AD
             );
 
             String message = objectMapper.writeValueAsString(expectedEvent);

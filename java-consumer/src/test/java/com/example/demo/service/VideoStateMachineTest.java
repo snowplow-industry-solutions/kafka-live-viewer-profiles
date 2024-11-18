@@ -1,89 +1,95 @@
 package com.example.demo.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.ignoreStubs;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.example.demo.model.VideoEvent;
 
 public class VideoStateMachineTest {
 
     private VideoStateMachine machine;
     private String viewerId = "viewer123";
-    private String videoId = "video456";
 
     @BeforeEach
     public void setUp() {
         machine = new VideoStateMachine();
     }
 
+    private VideoEvent videoEvent(String eventName) {
+        return new VideoEvent(0, null, null, eventName, viewerId, 0, 0, 0, null);
+    }
+
     @Test
     public void testInitialState() {
-        assertEquals(VideoStateMachine.State.WATCHING_VIDEO, machine.getCurrentState(viewerId, videoId));
+        assertEquals(VideoStateMachine.State.WATCHING_VIDEO, machine.getCurrentState(viewerId));
     }
 
     @Test
     public void testPauseEvent() {
-        machine.handleEvent(viewerId, videoId, "pause_event");
-        assertEquals(VideoStateMachine.State.PAUSED_VIDEO, machine.getCurrentState(viewerId, videoId));
+        machine.handleEvent(videoEvent("pause_event"));
+        assertEquals(VideoStateMachine.State.PAUSED_VIDEO, machine.getCurrentState(viewerId));
     }
 
     @Test
     public void testPlayEventFromPaused() {
-        machine.handleEvent(viewerId, videoId, "pause_event");
-        machine.handleEvent(viewerId, videoId, "play_event");
-        assertEquals(VideoStateMachine.State.WATCHING_VIDEO, machine.getCurrentState(viewerId, videoId));
+        machine.handleEvent(videoEvent("pause_event"));
+        machine.handleEvent(videoEvent("play_event"));
+        assertEquals(VideoStateMachine.State.WATCHING_VIDEO, machine.getCurrentState(viewerId));
     }
 
     @Test
     public void testAdBreakStartEvent() {
-        machine.handleEvent(viewerId, videoId, "ad_break_start_event");
-        assertEquals(VideoStateMachine.State.WATCHING_AD, machine.getCurrentState(viewerId, videoId));
+        machine.handleEvent(videoEvent("ad_break_start_event"));
+        assertEquals(VideoStateMachine.State.WATCHING_AD, machine.getCurrentState(viewerId));
     }
 
     @Test
     public void testAdBreakEndEvent() {
-        machine.handleEvent(viewerId, videoId, "ad_break_start_event");
-        machine.handleEvent(viewerId, videoId, "ad_break_end_event");
-        assertEquals(VideoStateMachine.State.WATCHING_VIDEO, machine.getCurrentState(viewerId, videoId));
+        machine.handleEvent(videoEvent("ad_break_start_event"));
+        machine.handleEvent(videoEvent("ad_break_end_event"));
+        assertEquals(VideoStateMachine.State.WATCHING_VIDEO, machine.getCurrentState(viewerId));
     }
 
     @Test
     public void testEndEventFromWatchingVideo() {
-        machine.handleEvent(viewerId, videoId, "end_event");
-        assertEquals(VideoStateMachine.State.COMPLETED_VIDEO, machine.getCurrentState(viewerId, videoId));
+        machine.handleEvent(videoEvent("end_event"));
+        assertEquals(VideoStateMachine.State.COMPLETED_VIDEO, machine.getCurrentState(viewerId));
     }
 
     @Test
     public void testEndEventFromWatchingAd() {
-        machine.handleEvent(viewerId, videoId, "ad_break_start_event");
-        machine.handleEvent(viewerId, videoId, "end_event");
-        assertEquals(VideoStateMachine.State.COMPLETED_VIDEO, machine.getCurrentState(viewerId, videoId));
+        machine.handleEvent(videoEvent("ad_break_start_event"));
+        machine.handleEvent(videoEvent("end_event"));
+        assertEquals(VideoStateMachine.State.COMPLETED_VIDEO, machine.getCurrentState(viewerId));
     }
 
     @Test
     public void testPingEventInWatchingVideo() {
-        machine.handleEvent(viewerId, videoId, "ping_event");
-        assertEquals(VideoStateMachine.State.WATCHING_VIDEO, machine.getCurrentState(viewerId, videoId));
+        machine.handleEvent(videoEvent("ping_event"));
+        assertEquals(VideoStateMachine.State.WATCHING_VIDEO, machine.getCurrentState(viewerId));
     }
 
     @Test
     public void testPingEventInWatchingAd() {
-        machine.handleEvent(viewerId, videoId, "ad_break_start_event");
-        machine.handleEvent(viewerId, videoId, "ping_event");
-        assertEquals(VideoStateMachine.State.WATCHING_AD, machine.getCurrentState(viewerId, videoId));
+        machine.handleEvent(videoEvent("ad_break_start_event"));
+        machine.handleEvent(videoEvent("ping_event"));
+        assertEquals(VideoStateMachine.State.WATCHING_AD, machine.getCurrentState(viewerId));
     }
 
     @Test
     public void testPingEventDoesNotAffectPausedVideo() {
-        machine.handleEvent(viewerId, videoId, "pause_event");
-        machine.handleEvent(viewerId, videoId, "ping_event");
-        assertEquals(VideoStateMachine.State.PAUSED_VIDEO, machine.getCurrentState(viewerId, videoId));
+        machine.handleEvent(videoEvent("pause_event"));
+        machine.handleEvent(videoEvent("ping_event"));
+        assertEquals(VideoStateMachine.State.PAUSED_VIDEO, machine.getCurrentState(viewerId));
     }
 
     @Test
     public void testPingEventDoesNotAffectCompletedVideo() {
-        machine.handleEvent(viewerId, videoId, "end_event");
-        machine.handleEvent(viewerId, videoId, "ping_event");
-        assertEquals(VideoStateMachine.State.COMPLETED_VIDEO, machine.getCurrentState(viewerId, videoId));
+        machine.handleEvent(videoEvent("end_event"));
+        machine.handleEvent(videoEvent("ping_event"));
+        assertEquals(VideoStateMachine.State.COMPLETED_VIDEO, machine.getCurrentState(viewerId));
     }
 }

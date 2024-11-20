@@ -98,7 +98,7 @@ services:
       - kafka
 
   live-viewer-backend:
-    build: java-consumer
+    build: live-viewer-backend
     ports:
       - 8180:8080
     environment:

@@ -84,7 +84,7 @@ services:
           echo 'Topic \"snowplow-enriched-good\" already exists.'
         fi
       "
-    restart: "no"
+    restart: no
 
   kafka-ui:
     image: ghcr.io/kafbat/kafka-ui:latest
@@ -97,7 +97,7 @@ services:
     depends_on:
       - kafka
 
-  java-consumer:
+  live-viewer-backend:
     build: java-consumer
     ports:
       - 8180:8080
@@ -112,6 +112,15 @@ services:
       timeout: 10s
       retries: 5
     restart: on-failure
+
+  live-viewer-frontend:
+    build: live-viewer-frontend
+    ports:
+      - 8280:80
+    volumes:
+      - ./live-viewer-frontend/public:/app
+    depends_on:
+      - live-viewer-backend
 
 volumes:
   zookeeper_data:

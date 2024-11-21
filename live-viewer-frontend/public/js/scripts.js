@@ -34,6 +34,10 @@ function updateViewerCount() {
       .length
 }
 
+function filteredMessageData({ viewer_id, status, adId, video_ts, adsClicked, adsSkipped }) {
+    return { viewer_id, status, adId, video_ts, adsClicked, adsSkipped };
+}
+
 function addMessageBox(event, textContent) {
     const messageData = textContent || JSON.parse(event.data)
     messageCount++
@@ -50,7 +54,8 @@ function addMessageBox(event, textContent) {
 
     const contentElement = document.createElement("div")
     contentElement.className = "message-content"
-    contentElement.textContent = textContent || JSON.stringify(messageData, null, 2)
+    contentElement.textContent = textContent || JSON.stringify(
+      filteredMessageData(messageData), null, 2)
 
     messageElement.appendChild(titleElement)
     messageElement.appendChild(contentElement)

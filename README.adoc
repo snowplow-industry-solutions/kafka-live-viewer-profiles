@@ -60,7 +60,7 @@ These steps demonstrate how to test, locally, the sending of events https://snow
 . [[limitation1]] In this version, as I am using {SnowplowMicro} to generate events, and it does not have native support for generating events for {Kinesis}, this is not addressed.
 
 <<<
-=== TODO (or [line-through]#DONE#)
+=== TODO or [line-through]#DONE or CANCELED#)
 
 . Create a entire Docker Compose infrastructure to run components locally.
 .. [line-through]#Configure a {SnowplowMicro} container#. *<- DONE*
@@ -78,11 +78,13 @@ These steps demonstrate how to test, locally, the sending of events https://snow
 . [line-through]#Create and keep this documentation updated#. *<- DONE*
 . Maybe:
 .. Refactor the code to make it cleaner and create more test code.
-.. Separate the frontend code from the Java backend.
+.. [line-through]#Separate the frontend code from the Java backend#. *<- DONE*
 ... So the Spring backend will skip to use {Thymeleaf} and be more focused on manage backend messages (Kafka and {WebSockets}).
 ... Since it is only a static page, it can be in a separate container managed by Ngnix (as an example).
+.. [line-through]#frontend -> Detect if WebSocket Server (backend) is up or down#. *<- DONE*
+.. [line-through]#frontend -> Change to use Snowplow's website colors#. *<- DONE*
 . Configure Snowplow to send messages to {Kinesis} and test it locally with {LocalStack}. *<- <<question-localstack,question here>>*
-. [[databricks-setup]] Create a {DatabricksAccelerator}. *<-<<question-databricks,question here>>*
+. [[databricks-setup]] [line-through]#Create a {DatabricksAccelerator}. *<-<<question-databricks,question here>>#* *<- CANCELED*
 
 <<<
 .My questions (doubts):
@@ -138,7 +140,7 @@ You will get a page like this one:
 image:js-tracker-3.png[]
 
 [[step3]]
-=== Step 3 -> Open http://localhost:8180 to see the "Snowplow Live Viewer Profile" UI.
+=== Step 3 -> Open http://localhost:8280 to see the "Snowplow Live Viewer Profile" UI.
 
 See details on the <<video2>>.
 

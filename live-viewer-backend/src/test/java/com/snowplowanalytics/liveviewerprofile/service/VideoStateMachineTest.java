@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.snowplowanalytics.liveviewerprofile.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.ignoreStubs;
@@ -6,7 +6,7 @@ import static org.mockito.Mockito.ignoreStubs;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.example.demo.model.VideoEvent;
+import com.snowplowanalytics.liveviewerprofile.model.VideoEvent;
 
 public class VideoStateMachineTest {
 

@@ -1,4 +1,4 @@
-package com.example.demo.websocket;
+package com.snowplowanalytics.liveviewerprofile.websocket;
 
 import java.util.Collections;
 import java.util.HashSet;

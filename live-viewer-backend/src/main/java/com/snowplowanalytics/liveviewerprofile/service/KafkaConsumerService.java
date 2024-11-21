@@ -1,11 +1,11 @@
-package com.example.demo.service;
+package com.snowplowanalytics.liveviewerprofile.service;
 
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.model.VideoEvent;
-import com.example.demo.websocket.WebSocketHandler;
+import com.snowplowanalytics.liveviewerprofile.model.VideoEvent;
+import com.snowplowanalytics.liveviewerprofile.websocket.WebSocketHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;

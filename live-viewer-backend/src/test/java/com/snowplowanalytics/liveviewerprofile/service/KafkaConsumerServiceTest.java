@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.snowplowanalytics.liveviewerprofile.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +23,7 @@ import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
-import com.example.demo.model.VideoEvent;
+import com.snowplowanalytics.liveviewerprofile.model.VideoEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest

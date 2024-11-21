@@ -1,8 +1,8 @@
-package com.example.demo.model;
+package com.snowplowanalytics.liveviewerprofile.model;
 
 import java.time.Instant;
 
-import com.example.demo.service.VideoStateMachine.State;
+import com.snowplowanalytics.liveviewerprofile.service.VideoStateMachine.State;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record VideoEvent(

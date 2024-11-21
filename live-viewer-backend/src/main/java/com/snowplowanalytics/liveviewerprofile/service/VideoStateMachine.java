@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.snowplowanalytics.liveviewerprofile.service;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.model.VideoEvent;
+import com.snowplowanalytics.liveviewerprofile.model.VideoEvent;
 
 @Service
 public class VideoStateMachine {

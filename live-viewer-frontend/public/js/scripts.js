@@ -5,9 +5,12 @@ const messageCountSpan = document.getElementById("message-count")
 const viewerCountSpan = document.getElementById("viewer-count")
 const viewerIdColors = {}
 const colorPalette = [
-    '#DCC3F6', '#6AE9F4', '#FEC0B1', '#FD5F37', "#FFB6C1",
+    '#6AE9F4', '#DCC3F6', '#FEC0B1', '#FD5F37', "#FFB6C1",
     "#FFD700", "#87CEFA", "#90EE90", "#FFA07A", "#9370DB",
 ]
+
+const h1Title = document.querySelector(".container .header h1")
+h1Title.textContent = document.title
 
 let openStatusReported = false
 let closeStatusReported = false

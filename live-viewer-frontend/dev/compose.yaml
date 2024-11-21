@@ -4,4 +4,4 @@ services:
     ports:
       - 8280:80
     volumes:
-      - ./public:/dev
+      - ./public:/app

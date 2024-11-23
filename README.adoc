@@ -27,6 +27,7 @@ endif::[]
 :LocalStack: https://www.localstack.cloud/[LocalStack]
 :Thymeleaf: https://docs.spring.io/spring-framework/reference/web/webmvc-view/mvc-thymeleaf.html[Thymeleaf]
 :WebSockets: https://docs.spring.io/spring-framework/reference/web/websocket.html[WebSockets]
+:LazyDocker: https://github.com/jesseduffield/lazydocker[LazyDocker]
 
 ifdef::backend-pdf[]
 [.text-center]
@@ -83,7 +84,7 @@ These steps demonstrate how to test, locally, the sending of events https://snow
 ... Since it is only a static page, it can be in a separate container managed by Ngnix (as an example).
 .. [line-through]#frontend -> Detect if WebSocket Server (backend) is up or down#. *<- DONE*
 .. [line-through]#frontend -> Change to use Snowplow's website colors#. *<- DONE*
-. Configure Snowplow to send messages to {Kinesis} and test it locally with {LocalStack}. *<- <<question-localstack,question here>>*
+. [line-through]#Configure Snowplow to send messages to {Kinesis} and test it locally with {LocalStack}#. *<- DONE*
 . [[databricks-setup]] [line-through]#Create a {DatabricksAccelerator}. *<-<<question-databricks,question here>>#* *<- CANCELED*
 
 <<<
@@ -92,8 +93,11 @@ These steps demonstrate how to test, locally, the sending of events https://snow
 [[question-localstack]] question-localstack) Do we need to create a version of this project to run with {LocalStack}?::
 Reason: this is a way to insert {Kinesis} in this solution and continue to test it locally. Currenty, to skip <<limitation1,this limitation>> and use only Snowplow Micro in this version, I created the <<snowbridge-caller>> project. +
 https://osodevops.slack.com/archives/C07RAQVAAJH/p1731493555873649?thread_ts=1731453220.008699&cid=C07RAQVAAJH[This was one of the things I chatted with Trent].
++
+*Snowplow's response: Yes.* Base code: https://github.com/snowplow-incubator/snowplow-local/
 
 [[question-databricks]] question-databricks) Do we need to create a version of this project to run inside Databricks (as a real <<databricks-accelerator>>)?::
+*Snowplows's response: No.* Message: https://osodevops.slack.com/archives/C07RAQVAAJH/p1732132934565859
 ****
 
 <<<
@@ -167,7 +171,15 @@ $ ./data/snowbridge.watch.sh
 See details on the <<video1>>.
 
 [[step7]]
-=== Step 7 -> Stop the containers
+
+=== Step 7 -> (optional) Open the {LocalStack} UI
+
+Open https://app.localstack.cloud/inst/default/overview.
+
+=== Step 8 -> (optional) Use {LazyDocker} to monitor the containers and logs
+
+[[step9]]
+=== Step 9 -> Stop the containers
 
 To stop all the containers:
 
@@ -176,8 +188,8 @@ To stop all the containers:
 $ ./down.sh
 ----
 
-[[step8]]
-=== Step 8 -> Restart this lab (to run it from scratch again)
+[[step10]]
+=== Step 10 -> Restart this lab (to run it from scratch again)
 
 To restart this lab:
 

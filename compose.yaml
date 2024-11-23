@@ -1,49 +1,113 @@
 services:
-  js-tracker:
-    build: js-tracker
+  localstack:
+    container_name: s-localstack
+    image: localstack/localstack
+    restart: always
     ports:
-      - 3000:3000
-
-  micro:
-    image: snowplow/snowplow-micro:2.1.2
-    ports:
-      - 9090:9090
-    volumes:
-      - ./config:/config
-      - ./data:/data
-    entrypoint: ["sh", "-c", "/opt/snowplow/bin/snowplow-micro --collector-config /config/micro.conf --iglu /config/iglu.json --output-tsv > /data/micro.tsv"]
-
-  snowbridge:
-    build: snowbridge
+      - 4566:4566
+      - 4510-4559:4510-4559
     environment:
-      - CALLER_SLEEP=1
-      - JS_SCRIPT_PATH=/config/video-data.js
+      - AWS_DEFAULT_REGION=eu-west-2
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=admin
+      - SERVICES=sts,dynamodb,kinesis,cloudwatch
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DISABLE_CORS_CHECKS=1
+      - KINESIS_LATENCY=0
+    volumes:
+      - ${TMPDIR:-/tmp}/localstack:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+
+  stream-collector:
+    container_name: s-stream-collector
+    image: snowplow/scala-stream-collector-kinesis:3.2.0-distroless
+    command: ["--config", "/snowplow/collector/config.hocon"]
+    depends_on:
+      - localstack
+    restart: always
+    ports:
+      - 9090:8080
+    environment:
+      - ACCEPT_LICENSE=${ACCEPT_LICENSE}
+      - AWS_REGION=eu-west-2
+      - AWS_ACCESS_KEY_ID=localstack
+      - AWS_SECRET_ACCESS_KEY=doesntmatter
       - SNOWBRIDGE_CONFIG_FILE=/config/snowbridge-config.hcl
     volumes:
-      - ./config:/config
-      - ./data:/app/data
+      - ./stream-collector/config.hocon:/snowplow/collector/config.hocon
+    extra_hosts:
+      - localhost.localstack.cloud:host-gateway
+      - host.docker.internal:host-gateway
+
+  enrich:
+    container_name: s-enrich
+    image: snowplow/snowplow-enrich-kinesis:5.0.0-distroless
+    command: ["--config", "/snowplow/enrich/enrich.hocon", "--iglu-config", "/snowplow/iglu-client/iglu_resolver.json", "--enrichments", "/snowplow/enrich/enrichments"]
     depends_on:
-      - kafka
+      - stream-collector
+    restart: always
+    environment:
+      - ACCEPT_LICENSE=${ACCEPT_LICENSE}
+      - AWS_REGION=eu-west-2
+      - AWS_ACCESS_KEY_ID=localstack
+      - AWS_SECRET_ACCESS_KEY=doesntmatter
+      - AWS_ENDPOINT_URL=localhost.localstack.cloud:4566
+    volumes:
+      - ./enrich:/snowplow/enrich
+      - ./iglu-client:/snowplow/iglu-client
+    extra_hosts:
+      - localhost.localstack.cloud:host-gateway
+      - host.docker.internal:host-gateway
+
+  snowbridge:
+    container_name: s-snowbridge
+    image: snowplow/snowbridge:2.4.2-aws-only
+    command: ["/opt/snowplow/snowbridge"]
+    environment:
+      - ACCEPT_LICENSE=${ACCEPT_LICENSE}
+      - AWS_REGION=eu-west-2
+      - AWS_ACCESS_KEY_ID=localstack
+      - AWS_SECRET_ACCESS_KEY=doesntmatter
+      - AWS_ENDPOINT_URL=http://localhost.localstack.cloud:4566
+      - JS_SCRIPT_PATH=/snowbridge/video-data.js
+      - SNOWBRIDGE_CONFIG_FILE=/snowbridge/config.hcl
+    volumes:
+      - ./snowbridge:/snowbridge
+    extra_hosts:
+      - localhost.localstack.cloud:host-gateway
+    depends_on:
+      - enrich
+      - localstack
       - kafka-init
     healthcheck:
       test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server kafka:9093 --list | grep -q snowplow-enriched-good"]
       interval: 30s
       timeout: 10s
       retries: 5
-    restart: always
+    restart: unless-stopped
+
+  js-tracker:
+    container_name: s-js-tracker
+    build: js-tracker
+    ports:
+      - 3000:3000
 
   zookeeper:
+    container_name: s-zookeeper
     image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - "2181:2181"
+      - 2181:2181
     volumes:
       - zookeeper_data:/var/lib/zookeeper/data
       - zookeeper_logs:/var/lib/zookeeper/log
 
   kafka:
+    container_name: s-kafka
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
@@ -67,6 +131,7 @@ services:
       retries: 5
 
   kafka-init:
+    container_name: s-kafka-init
     image: confluentinc/cp-kafka:latest
     depends_on:
       - kafka
@@ -87,6 +152,7 @@ services:
     restart: no
 
   kafka-ui:
+    container_name: s-kafka-ui
     image: ghcr.io/kafbat/kafka-ui:latest
     ports:
       - 8080:8080
@@ -98,13 +164,13 @@ services:
       - kafka
 
   live-viewer-backend:
+    container_name: s-backend
     build: live-viewer-backend
     ports:
       - 8180:8080
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9093
     depends_on:
-      - kafka
       - kafka-init
     healthcheck:
       test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server kafka:9093 --list | grep -q snowplow-enriched-good"]
@@ -114,6 +180,7 @@ services:
     restart: on-failure
 
   live-viewer-frontend:
+    container_name: s-frontend
     build: live-viewer-frontend
     ports:
       - 8280:80

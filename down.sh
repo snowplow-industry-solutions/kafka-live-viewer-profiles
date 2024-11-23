@@ -2,5 +2,12 @@
 set -eou pipefail
 cd $(dirname $0)
 
-echo Stoping containers ...
-docker compose down
+container=${1:-}
+
+[ "${container:-}" ] && {
+    container=${container%/}
+    echo Stopping $container ... 
+    export container
+} || echo Stopping containers ...
+
+docker compose down ${container:-}

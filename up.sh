@@ -2,10 +2,16 @@
 set -eou pipefail
 cd $(dirname $0)
 
-echo Setting permissions for directory data ...
-chmod 777 data
+container=${1:-}
 
-echo Starting containers ...
-docker compose up -d
+[ "${container:-}" ] && {
+    container=${container%/}
+    echo Starting $container ... 
+    export container
+} || echo Starting containers ...
+
+[ -f .env ] || sed 's/false/true/g' .env.example > .env
+
+docker compose up ${container:-} -d
 
 ./logs.sh

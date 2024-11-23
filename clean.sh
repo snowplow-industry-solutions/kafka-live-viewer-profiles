@@ -19,6 +19,4 @@ yes | docker volume prune || :
 echo Removing built images ...
 docker compose down --rmi local
 
-./data/clean.sh all
-
 #(cd java-consumer; ./gradlew clean) || :

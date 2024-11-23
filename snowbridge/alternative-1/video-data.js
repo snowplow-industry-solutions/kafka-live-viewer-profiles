@@ -49,9 +49,6 @@ function main(input) {
       adsSkipped,
       adId,
       video_ts: currentTime,
-      //contentWatched,
-      //paused,
-      //ended,
     }
   }
 }

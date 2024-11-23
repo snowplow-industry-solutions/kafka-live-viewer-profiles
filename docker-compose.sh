@@ -17,6 +17,7 @@ esac
 case "$container" in
     live-viewer-backend | \
     live-viewer-frontend | \
+    snowbridge | \
     : ) : ;;
     *) invalid-container
 esac

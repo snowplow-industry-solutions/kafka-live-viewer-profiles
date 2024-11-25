@@ -15,6 +15,10 @@ awslocal dynamodb create-table --table-name snowbridge_metadata --region eu-west
 awslocal dynamodb create-table \
     --table-name video_events \
     --region eu-west-2 \
-    --key-schema AttributeName=viewer_id,KeyType=HASH \
-    --attribute-definitions AttributeName=viewer_id,AttributeType=S \
+    --attribute-definitions \
+        AttributeName=viewer_id,AttributeType=S \
+        AttributeName=collector_tstamp,AttributeType=S \
+    --key-schema \
+        AttributeName=viewer_id,KeyType=HASH \
+        AttributeName=collector_tstamp,KeyType=RANGE \
     --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5

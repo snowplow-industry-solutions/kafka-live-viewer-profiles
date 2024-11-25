@@ -1,0 +1,7 @@
+aws:
+  credentials:
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+  dynamodb:
+    endpoint: ${AWS_ENDPOINT_URL}
+  region: ${AWS_REGION}

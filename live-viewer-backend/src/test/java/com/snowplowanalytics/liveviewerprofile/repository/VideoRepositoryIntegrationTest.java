@@ -21,7 +21,7 @@ import com.snowplowanalytics.liveviewerprofile.model.VideoEvent;
 import static com.snowplowanalytics.liveviewerprofile.service.VideoStateMachine.State.WATCHING_AD;
 import static com.snowplowanalytics.liveviewerprofile.service.VideoStateMachine.State.WATCHING_VIDEO;
 
-@Disabled
+@Disabled // TODO: Fix this test
 @Testcontainers
 @SpringBootTest
 class VideoEventRepositoryIntegrationTest {
@@ -44,27 +44,15 @@ class VideoEventRepositoryIntegrationTest {
 
     @Test
     void testSaveAndCountVideoEvents() {
-        videoEventRepository.saveVideoEvent(new VideoEvent(
-                123.45,
-                Instant.now(),
-                "event1",
-                "play",
-                "viewer1",
-                0,
-                0,
-                0,
-                WATCHING_AD));
+        videoEventRepository.saveVideoEvent(VideoEvent.builder()
+                .eventId("123")
+                .collectorTstamp(Instant.now())
+                .build());
 
-        videoEventRepository.saveVideoEvent(new VideoEvent(
-                678.90,
-                Instant.now(),
-                "event2",
-                "pause",
-                "viewer2",
-                0,
-                0,
-                0,
-                WATCHING_VIDEO));
+        videoEventRepository.saveVideoEvent(VideoEvent.builder()
+                .eventId("456")
+                .collectorTstamp(Instant.now())
+                .build());
 
         List<VideoEvent> savedEvents = videoEventRepository.getVideoEvents();
         assertThat(savedEvents).hasSize(2);

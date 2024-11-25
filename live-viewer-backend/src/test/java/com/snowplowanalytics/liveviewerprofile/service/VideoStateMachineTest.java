@@ -18,7 +18,7 @@ public class VideoStateMachineTest {
     }
 
     private VideoEvent videoEvent(String eventName) {
-        return new VideoEvent(0, null, null, eventName, viewerId, 0, 0, 0, null);
+        return VideoEvent.builder().viewerId(viewerId).eventName(eventName).build();
     }
 
     @Test

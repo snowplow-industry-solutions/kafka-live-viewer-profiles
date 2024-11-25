@@ -7,14 +7,6 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       topics: snowplow-enriched-good
-  cloud:
-    aws:
-      credentials:
-        access-key: ${AWS_ACCESS_KEY_ID:admin}
-        secret-key: ${AWS_SECRET_ACCESS_KEY:admin}
-      dynamodb:
-        region: ${AWS_REGION:eu-west-2}
-        endpoint: ${AWS_ENDPOINT_URL:localhost:4566}
 
 server:
   port: 8080
@@ -24,4 +16,3 @@ logging:
     liveviewerprofile: com.snowplowanalytics.liveviewerprofile
   level:
     liveviewerprofile: DEBUG
-

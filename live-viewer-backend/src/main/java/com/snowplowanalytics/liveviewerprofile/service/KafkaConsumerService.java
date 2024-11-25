@@ -41,11 +41,11 @@ public class KafkaConsumerService {
             State lastStatus = lastStatusByViewer.get(viewerId);
 
             VideoEvent updatedVideoEvent = new VideoEvent(
-                videoEvent.getVideoTs(),
+                viewerId,
                 videoEvent.getCollectorTstamp(),
                 videoEvent.getEventId(),
                 videoEvent.getEventName(),
-                viewerId,
+                videoEvent.getVideoTs(),
                 videoEvent.getAdsClicked(),
                 videoEvent.getAdsSkipped(),
                 videoEvent.getAdId(),

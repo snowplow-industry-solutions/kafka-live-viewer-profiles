@@ -26,7 +26,7 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.snowplowanalytics.liveviewerprofile.model.VideoEvent;
 
-@Disabled
+@Disabled // TODO: Fix this test
 @SpringBootTest
 @EmbeddedKafka(partitions = 1, topics = { "test-topic" })
 class KafkaConsumerServiceTest {
@@ -64,16 +64,17 @@ class KafkaConsumerServiceTest {
         container.start();
 
         try {
-            VideoEvent expectedEvent = new VideoEvent(
-                    126.105709,
-                    Instant.parse("2024-11-17T10:10:56.957Z"),
-                    "039e8653-5d30-4135-a273-86d42ce7ea1b",
-                    "pause_event",
-                    "143f9cb9-3db9-4e99-8d67-c8aea075d190",
-                    0,
-                    4,
-                    0,
-                    VideoStateMachine.State.WATCHING_AD);
+            VideoEvent expectedEvent = VideoEvent.builder()
+                    .viewerId("039e8653-5d30-4135-a273-86d42ce7ea1b")
+                    .collectorTstamp(Instant.parse("2024-11-17T10:10:56.957Z"))
+                    .eventId("143f9cb9-3db9-4e99-8d67-c8aea075d190")
+                    .eventName("pause_event")
+                    .videoTs(126.1057090)
+                    .adsClicked(0)
+                    .adsSkipped(4)
+                    .adId(0)
+                    .status(VideoStateMachine.State.WATCHING_AD)
+                    .build();
 
             String message = objectMapper.writeValueAsString(expectedEvent);
 

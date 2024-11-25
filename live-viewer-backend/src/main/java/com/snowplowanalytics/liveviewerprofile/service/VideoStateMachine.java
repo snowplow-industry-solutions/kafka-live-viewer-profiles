@@ -28,11 +28,11 @@ public class VideoStateMachine {
     );
 
     public State handleEvent(VideoEvent videoEvent) {
-        return viewerVideoStates.compute(videoEvent.viewerId(), (k, currentState) -> {
+        return viewerVideoStates.compute(videoEvent.getViewerId(), (k, currentState) -> {
             if (currentState == null) {
                 currentState = State.WATCHING_VIDEO;
             }
-            return stateTransitions.get(currentState).apply(videoEvent.eventName());
+            return stateTransitions.get(currentState).apply(videoEvent.getEventName());
         });
     }
 
@@ -64,6 +64,6 @@ public class VideoStateMachine {
     }
 
     public State getCurrentState(VideoEvent videoEvent) {
-        return getCurrentState(videoEvent.viewerId());
+        return getCurrentState(videoEvent.getViewerId());
     }
 }

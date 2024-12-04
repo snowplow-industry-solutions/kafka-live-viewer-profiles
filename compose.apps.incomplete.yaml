@@ -1,0 +1,12 @@
+services:
+  js-tracker:
+    container_name: s-tracker
+    build: js-tracker
+    ports:
+      - 3000:80
+
+  live-viewer-frontend:
+    container_name: s-viewer
+    build: live-viewer-frontend
+    ports:
+      - 8280:80

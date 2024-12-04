@@ -1,7 +1,7 @@
 services:
-  js-tracker:
+  tracker-frontend:
     container_name: s-tracker
-    build: js-tracker
+    build: tracker-frontend
     ports:
       - 3000:80
 

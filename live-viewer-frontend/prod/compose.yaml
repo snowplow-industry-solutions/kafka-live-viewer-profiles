@@ -1,7 +1,0 @@
-services:
-  web:
-    image: nginx
-    ports:
-      - 8280:80
-    volumes:
-      - ./public:/usr/share/nginx/html

@@ -1,0 +1,68 @@
+services:
+  stream-collector:
+    container_name: s-stream-collector
+    image: snowplow/scala-stream-collector-kinesis:3.2.0-distroless
+    command: ["--config", "/snowplow/collector/config.hocon"]
+    depends_on:
+      - localstack
+    restart: always
+    ports:
+      - 9090:8080
+    environment:
+      - ACCEPT_LICENSE=${ACCEPT_LICENSE}
+      - AWS_REGION=eu-west-2
+      - AWS_ACCESS_KEY_ID=localstack
+      - AWS_SECRET_ACCESS_KEY=doesntmatter
+      - SNOWBRIDGE_CONFIG_FILE=/config/snowbridge-config.hcl
+    volumes:
+      - ./stream-collector/config.hocon:/snowplow/collector/config.hocon
+    extra_hosts:
+      - localhost.localstack.cloud:host-gateway
+      - host.docker.internal:host-gateway
+
+  enrich:
+    container_name: s-enrich
+    image: snowplow/snowplow-enrich-kinesis:5.0.0-distroless
+    command: ["--config", "/snowplow/enrich/enrich.hocon", "--iglu-config", "/snowplow/iglu-client/iglu_resolver.json", "--enrichments", "/snowplow/enrich/enrichments"]
+    depends_on:
+      - stream-collector
+    restart: always
+    environment:
+      - ACCEPT_LICENSE=${ACCEPT_LICENSE}
+      - AWS_REGION=eu-west-2
+      - AWS_ACCESS_KEY_ID=localstack
+      - AWS_SECRET_ACCESS_KEY=doesntmatter
+      - AWS_ENDPOINT_URL=localhost.localstack.cloud:4566
+    volumes:
+      - ./enrich:/snowplow/enrich
+      - ./iglu-client:/snowplow/iglu-client
+    extra_hosts:
+      - localhost.localstack.cloud:host-gateway
+      - host.docker.internal:host-gateway
+
+  snowbridge:
+    container_name: s-snowbridge
+    image: snowplow/snowbridge:2.4.2-aws-only
+    command: ["/opt/snowplow/snowbridge"]
+    environment:
+      - ACCEPT_LICENSE=${ACCEPT_LICENSE}
+      - AWS_REGION=eu-west-2
+      - AWS_ACCESS_KEY_ID=localstack
+      - AWS_SECRET_ACCESS_KEY=doesntmatter
+      - AWS_ENDPOINT_URL=http://localhost.localstack.cloud:4566
+      - JS_SCRIPT_PATH=/snowbridge/video-data.js
+      - SNOWBRIDGE_CONFIG_FILE=/snowbridge/config.hcl
+    volumes:
+      - ./snowbridge:/snowbridge
+    extra_hosts:
+      - localhost.localstack.cloud:host-gateway
+    depends_on:
+      - enrich
+      - localstack
+      - kafka-init
+    healthcheck:
+      test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server kafka:9093 --list | grep -q snowplow-enriched-good"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped

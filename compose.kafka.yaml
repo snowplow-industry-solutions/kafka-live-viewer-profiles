@@ -1,0 +1,75 @@
+services:
+  zookeeper:
+    container_name: s-zookeeper
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 2181:2181
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_logs:/var/lib/zookeeper/log
+
+  kafka:
+    container_name: s-kafka
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9093,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+      - kafka_logs:/var/lib/kafka/log
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo 'status' | nc localhost 9093 | grep 'Mode: '"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kafka-init:
+    container_name: s-kafka-init
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - kafka
+    entrypoint: >
+      bash -c "
+        echo 'Waiting for Kafka to be ready...'
+        while ! nc -z kafka 9093; do
+          sleep 1
+        done
+        echo 'Kafka is ready. Creating topic...'
+        kafka-topics --create --topic snowplow-enriched-good --bootstrap-server kafka:9093 --replication-factor 1 --partitions 1
+        if [ $? -eq 0 ]; then
+          echo 'Topic \"snowplow-enriched-good\" created successfully.'
+        else
+          echo 'Topic \"snowplow-enriched-good\" already exists.'
+        fi
+      "
+    restart: no
+
+  kafka-ui:
+    container_name: s-kafka-ui
+    image: ghcr.io/kafbat/kafka-ui:latest
+    ports:
+      - 8080:8080
+    environment:
+      #KAFKA_CLUSTERS_0_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+    depends_on:
+      - kafka
+
+volumes:
+  zookeeper_data:
+  zookeeper_logs:
+  kafka_data:
+  kafka_logs:

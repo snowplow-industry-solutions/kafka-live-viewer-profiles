@@ -8,9 +8,5 @@ WORKDIR /app/snowplow-javascript-tracker-examples-master/react
 RUN yarn install \
     && yarn build
 
-FROM node:20-alpine
-WORKDIR /app
-COPY --from=build /app/snowplow-javascript-tracker-examples-master/react/build /app/build
-RUN npm install -g serve
-EXPOSE 3000
-CMD ["serve", "-s", "build", "-l", "3000"]
+FROM nginx:alpine
+COPY --from=build /app/snowplow-javascript-tracker-examples-master/react/build /usr/share/nginx/html

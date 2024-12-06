@@ -1,5 +1,5 @@
-variable "ssh_user" {
-  description = "User name to estabilish the SSH connection"
+variable "instance_type" {
+  description = "Instance type to build and run the containers s-tracker, s-viewer and s-backend"
   type        = string
-  default     = "ubuntu"
+  default     = "t3.medium"
 }

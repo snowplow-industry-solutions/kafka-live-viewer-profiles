@@ -1,17 +1,13 @@
 #!/usr/bin/env bash
 set -eou pipefail
 cd $(dirname $0)
+source ./common.sh
 
-container=${1:-}
-
-[ "${container:-}" ] && {
-    container=${container%/}
-    echo Starting $container ... 
-    export container
-} || echo Starting containers ...
+set-services "$@"
+show-services Starting
 
 [ -f .env ] || sed 's/false/true/g' .env.example > .env
 
-docker compose up ${container:-} -d
+docker compose up ${services:-} -d
 
-./logs.sh
+! $show_logs || ./logs.sh "$@"

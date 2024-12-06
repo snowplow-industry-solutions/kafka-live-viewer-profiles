@@ -3,7 +3,7 @@ set -eou pipefail
 cd $(dirname $0)
 BASE_DIR=$(basename $PWD)
 
-echo NOTE: You are expected to run this script with containers not running.
+./down.sh "$@"
 
 echo Removing containers ...
 docker compose rm --volumes || :
@@ -18,5 +18,3 @@ yes | docker volume prune || :
 
 echo Removing built images ...
 docker compose down --rmi local
-
-#(cd java-consumer; ./gradlew clean) || :

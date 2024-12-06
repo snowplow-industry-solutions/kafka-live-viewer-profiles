@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
 set -eou pipefail
 cd $(dirname $0)
+source ./common.sh
 
-[ "${1:-}" ] && container=$1
-container=${container:-}
+set-services "$@"
+show-services 'Showing logs for'
 
-[ "${container:-}" ] &&
-    container=${container%/}
-    echo -n Showing logs for $container. ||
-    echo -n Showing logs for all containers.
+echo Press Ctrl+C to free your terminal ...
 
-echo ' Press' 'Ctrl+C' to free your terminal ...
-
-docker compose logs ${container:-} -f
+docker compose logs ${services:-} -f

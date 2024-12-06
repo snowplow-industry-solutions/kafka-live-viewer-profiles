@@ -4,6 +4,5 @@ cd $(dirname $0)
 source ./common.sh
 
 set-services "$@"
-show-services Stopping
 
-docker compose down ${services:-}
+docker compose stats ${services:-}

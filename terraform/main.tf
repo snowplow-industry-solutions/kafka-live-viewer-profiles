@@ -1,5 +1,13 @@
+locals {
+  region       = "eu-west-2"
+  ami          = "ami-0e8d228ad90af673b"
+  user         = "ubuntu"
+  tracker-port = 3000
+  viewer-port  = 8280
+}
+
 provider "aws" {
-  region = "eu-west-2"
+  region = local.region
 }
 
 resource "aws_default_vpc" "default_vpc" {
@@ -15,14 +23,14 @@ resource "aws_security_group" "snowplow-demo-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    from_port   = 3000
-    to_port     = 3000
+    from_port   = local.tracker-port
+    to_port     = local.tracker-port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    from_port   = 8280
-    to_port     = 8280
+    from_port   = local.viewer-port
+    to_port     = local.viewer-port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -45,16 +53,16 @@ resource "aws_key_pair" "ec2_key" {
 }
 
 resource "local_file" "ssh_key" {
-  filename = "keypair.pem"
+  filename        = "keypair.pem"
   file_permission = "0600"
-  content  = tls_private_key.ec2_key.private_key_pem
+  content         = tls_private_key.ec2_key.private_key_pem
 }
 
 resource "aws_instance" "snowplow-demo" {
-  ami           = "ami-0e8d228ad90af673b"
-  instance_type = "t2.micro"
+  ami                    = local.ami
+  instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.snowplow-demo-sg.id]
-  key_name      = aws_key_pair.ec2_key.key_name
+  key_name               = aws_key_pair.ec2_key.key_name
 
   tags = {
     Name = "snowplow-demo-instance"
@@ -62,36 +70,40 @@ resource "aws_instance" "snowplow-demo" {
 
   connection {
     type        = "ssh"
-    user        = var.ssh_user
+    user        = local.user
     private_key = tls_private_key.ec2_key.private_key_pem
     host        = self.public_ip
   }
 
   provisioner "local-exec" {
-    working_dir = ".."
     command = "./aws-zip.sh"
   }
 
   provisioner "file" {
-    source      = "../snowplow-demo.zip"
-    destination = "/home/${var.ssh_user}/snowplow-demo.zip"
+    source      = "snowplow-demo.zip"
+    destination = "/home/${local.user}/snowplow-demo.zip"
   }
 
   provisioner "remote-exec" {
     inline = [
       "sudo apt update && sudo apt install -y unzip tree",
-      "unzip /home/${var.ssh_user}/snowplow-demo.zip -d /home/${var.ssh_user}/snowplow-demo",
-      "/home/${var.ssh_user}/snowplow-demo/docker-install.sh",
-      "rm -f /home/${var.ssh_user}/snowplow-demo.zip",
-      "rm -f /home/${var.ssh_user}/snowplow-demo/docker-install.sh"
+      "unzip -q /home/${local.user}/snowplow-demo.zip -d /home/${local.user}/snowplow-demo",
+      "bash /home/${local.user}/snowplow-demo/terraform/docker-install.sh",
+      "rm -f /home/${local.user}/snowplow-demo.zip",
+      "rm -rf /home/${local.user}/snowplow-demo/terraform"
     ]
   }
 }
 
-output "ssh-command" {
-  value = "ssh -i keypair.pem ${var.ssh_user}@${aws_instance.snowplow-demo.public_dns}"
+resource "local_file" "ssh_cmd" {
+  filename        = "ssh.sh"
+  file_permission = "0775"
+  content         = <<-EOF
+  #!/usr/bin/env bash
+  ssh -i keypair.pem ${local.user}@${aws_instance.snowplow-demo.public_dns}
+  EOF
 }
 
-output "public_ip" {
-  value = aws_instance.snowplow-demo.public_ip
+output "public_dns" {
+  value = aws_instance.snowplow-demo.public_dns
 }

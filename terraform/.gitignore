@@ -6,4 +6,5 @@ keypair.pem
 snowplow-demo.zip
 ssh.sh
 terraform.dot
-terraform.png
+README.html
+README.pdf

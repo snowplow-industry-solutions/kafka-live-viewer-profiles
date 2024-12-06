@@ -56,6 +56,10 @@ __graph() {
   __docker-run graph "$@"
 }
 
+__init() {
+  __docker-run init "$@"
+}
+
 __png() {
   __graph > terraform.dot
   dot -Tpng $this_dir/terraform.dot > terraform.png
@@ -94,11 +98,12 @@ then
   $fn "$@"
 else
   ! [[ $fn =~ help ]] || help
-  case $fn in
-    docker-build | docker-run)
-      $fn "$@"
-      exit 0
+  case "${fn#__}" in
+    --version)
+      __docker-run --version
+      ;;
+    *)
+      echo ERROR: There isn\'t a function $fn defined in $0
+      exit 1
   esac
-  echo ERROR: Invalid function $fn.
-  exit 1
 fi

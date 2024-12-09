@@ -9,21 +9,21 @@ collector {
   streams {
     good {
       name = "collector-good"
-      region = "eu-west-2"
+      region = ${AWS_REGION}
       customEndpoint = "localhost.localstack.cloud:4566"
       aws {
-         accessKey = env
-         secretKey = env
+         accessKey = ${AWS_ACCESS_KEY_ID}
+         secretKey = ${AWS_SECRET_ACCESS_KEY}
       }
     }
     
     bad {
       name = "collector-bad"
-      region = "eu-west-2"
+      region = ${AWS_REGION}
       customEndpoint = "localhost.localstack.cloud:4566"
       aws {
-         accessKey = env
-         secretKey = env
+         accessKey = ${AWS_ACCESS_KEY_ID}
+         secretKey = ${AWS_SECRET_ACCESS_KEY}
       }
     }
 

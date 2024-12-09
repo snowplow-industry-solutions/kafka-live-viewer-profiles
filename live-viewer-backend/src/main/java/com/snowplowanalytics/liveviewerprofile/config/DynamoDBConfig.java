@@ -12,6 +12,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder;
 
 @Configuration
 public class DynamoDBConfig extends AWSClientConfig {
@@ -21,11 +22,16 @@ public class DynamoDBConfig extends AWSClientConfig {
 
   @Bean
   public DynamoDbEnhancedClient dynamoDbClient() {
-    DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
+    DynamoDbClientBuilder builder = DynamoDbClient.builder()
         .region(Region.of(awsRegion))
-        .credentialsProvider(amazonAWSCredentialsProvider())
-        .endpointOverride(URI.create(awsDynamoDBEndPoint))
-        .build();
+        .credentialsProvider(amazonAWSCredentialsProvider());
+
+    if (awsDynamoDBEndPoint != null && !awsDynamoDBEndPoint.isEmpty()) {
+        builder.endpointOverride(URI.create(awsDynamoDBEndPoint));
+    }
+
+    DynamoDbClient dynamoDbClient = builder.build();
+
     return DynamoDbEnhancedClient.builder()
         .dynamoDbClient(dynamoDbClient)
         .build();

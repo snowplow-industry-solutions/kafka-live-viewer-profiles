@@ -7,7 +7,7 @@
     "type": "Kinesis"
     "appName": "snowplow-enrich-kinesis"
     "streamName": "collector-good"
-    "region": "eu-west-2"
+    "region": ${AWS_REGION}
     "customEndpoint": "http://localhost.localstack.cloud:4566"
     "initialPosition": {
       "type": "LATEST"
@@ -30,7 +30,7 @@
     "good": {
       "type": "Kinesis"
       "streamName": "enriched-good"
-      "region": "eu-west-2"
+      "region": ${AWS_REGION}
       "customEndpoint": "localhost.localstack.cloud:4566"
       "backoffPolicy": {
         "minBackoff": 100 milliseconds
@@ -48,7 +48,7 @@
     "pii": {
       "type": "Kinesis"
       "streamName": "pii"
-      "region": "eu-west-2"
+      "region": ${AWS_REGION}
       "backoffPolicy": {
         "minBackoff": 100 milliseconds
         "maxBackoff": 10 seconds
@@ -66,7 +66,7 @@
     "bad": {
       "type": "Kinesis"
       "streamName": "enriched-bad"
-      "region": "eu-west-2"
+      "region": ${AWS_REGION}
       "customEndpoint": "localhost.localstack.cloud:4566"
       "backoffPolicy": {
         "minBackoff": 100 milliseconds
@@ -84,7 +84,7 @@
     "incomplete": {
       "type": "Kinesis"
       "streamName": "enriched-incomplete"
-      "region": "eu-west-2"
+      "region": ${AWS_REGION}
       "customEndpoint": "localhost.localstack.cloud:4566"
       "backoffPolicy": {
         "minBackoff": 100 milliseconds

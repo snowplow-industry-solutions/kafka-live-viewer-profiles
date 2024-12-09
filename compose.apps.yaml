@@ -17,9 +17,16 @@ services:
     ports:
       - 8180:8080
     environment:
-      AWS_REGION: eu-west-2
-      AWS_ACCESS_KEY_ID: admin
-      AWS_SECRET_ACCESS_KEY: admin
-      AWS_ENDPOINT_URL: http://localstack:4566
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_ENDPOINT_URL: ${AWS_ENDPOINT_URL:-}
       KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+    depends_on:
+      - kafka-init
+    healthcheck:
+      test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server kafka:9093 --list | grep -q snowplow-enriched-good"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     restart: on-failure

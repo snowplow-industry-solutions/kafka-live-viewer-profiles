@@ -3,16 +3,14 @@ services:
     container_name: s-stream-collector
     image: snowplow/scala-stream-collector-kinesis:3.2.0-distroless
     command: ["--config", "/snowplow/collector/config.hocon"]
-    depends_on:
-      - localstack
     restart: always
     ports:
       - 9090:8080
     environment:
       - ACCEPT_LICENSE=${ACCEPT_LICENSE}
-      - AWS_REGION=eu-west-2
-      - AWS_ACCESS_KEY_ID=localstack
-      - AWS_SECRET_ACCESS_KEY=doesntmatter
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - SNOWBRIDGE_CONFIG_FILE=/config/snowbridge-config.hcl
     volumes:
       - ./stream-collector/config.hocon:/snowplow/collector/config.hocon
@@ -29,10 +27,10 @@ services:
     restart: always
     environment:
       - ACCEPT_LICENSE=${ACCEPT_LICENSE}
-      - AWS_REGION=eu-west-2
-      - AWS_ACCESS_KEY_ID=localstack
-      - AWS_SECRET_ACCESS_KEY=doesntmatter
-      - AWS_ENDPOINT_URL=localhost.localstack.cloud:4566
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL:-}
     volumes:
       - ./enrich:/snowplow/enrich
       - ./iglu-client:/snowplow/iglu-client
@@ -46,10 +44,10 @@ services:
     command: ["/opt/snowplow/snowbridge"]
     environment:
       - ACCEPT_LICENSE=${ACCEPT_LICENSE}
-      - AWS_REGION=eu-west-2
-      - AWS_ACCESS_KEY_ID=localstack
-      - AWS_SECRET_ACCESS_KEY=doesntmatter
-      - AWS_ENDPOINT_URL=http://localhost.localstack.cloud:4566
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL:-}
       - JS_SCRIPT_PATH=/snowbridge/video-data.js
       - SNOWBRIDGE_CONFIG_FILE=/snowbridge/config.hcl
     volumes:
@@ -58,7 +56,6 @@ services:
       - localhost.localstack.cloud:host-gateway
     depends_on:
       - enrich
-      - localstack
       - kafka-init
     healthcheck:
       test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server kafka:9093 --list | grep -q snowplow-enriched-good"]

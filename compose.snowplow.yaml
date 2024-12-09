@@ -17,13 +17,14 @@ services:
     extra_hosts:
       - localhost.localstack.cloud:host-gateway
       - host.docker.internal:host-gateway
+    depends_on:
+      aws-resources-wait:
+        condition: service_healthy
 
   enrich:
     container_name: s-enrich
     image: snowplow/snowplow-enrich-kinesis:5.0.0-distroless
     command: ["--config", "/snowplow/enrich/enrich.hocon", "--iglu-config", "/snowplow/iglu-client/iglu_resolver.json", "--enrichments", "/snowplow/enrich/enrichments"]
-    depends_on:
-      - stream-collector
     restart: always
     environment:
       - ACCEPT_LICENSE=${ACCEPT_LICENSE}
@@ -37,6 +38,9 @@ services:
     extra_hosts:
       - localhost.localstack.cloud:host-gateway
       - host.docker.internal:host-gateway
+    depends_on:
+      stream-collector:
+        condition: service_started
 
   snowbridge:
     container_name: s-snowbridge
@@ -54,12 +58,10 @@ services:
       - ./snowbridge:/snowbridge
     extra_hosts:
       - localhost.localstack.cloud:host-gateway
+      - host.docker.internal:host-gateway
     depends_on:
-      - enrich
-      - kafka-init
-    healthcheck:
-      test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server kafka:9093 --list | grep -q snowplow-enriched-good"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      enrich:
+        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
     restart: unless-stopped

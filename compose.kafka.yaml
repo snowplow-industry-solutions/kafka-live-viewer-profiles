@@ -30,7 +30,7 @@ services:
       - kafka_data:/var/lib/kafka/data
       - kafka_logs:/var/lib/kafka/log
     healthcheck:
-      test: ["CMD", "bash", "-c", "echo 'status' | nc localhost 9093 | grep 'Mode: '"]
+      test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server kafka:9093 --list | grep -q snowplow-enriched-good"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -39,7 +39,8 @@ services:
     container_name: s-kafka-init
     image: confluentinc/cp-kafka:latest
     depends_on:
-      - kafka
+      kafka:
+        condition: service_started
     entrypoint: >
       bash -c "
         echo 'Waiting for Kafka to be ready...'

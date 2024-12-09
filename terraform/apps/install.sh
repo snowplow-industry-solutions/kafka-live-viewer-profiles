@@ -41,6 +41,7 @@ log Removing AWS_ENDPOINT_URL from $dotenv ...
 sed -i '/AWS_ENDPOINT_URL/d' $dotenv
 
 for f in \
+  compose.*.yaml \
   enrich/enrich.hocon \
   snowbridge/config.hcl \
   stream-collector/config.hocon
@@ -48,6 +49,10 @@ do
   log Removing LocalStack configurations from $f ...
   sed -i '/localstack\.cloud/d' $f
 done
+
+script=aws-resources/wait-for.sh
+log Configuring script $script to AWS environment ...
+sed -i 's/^\(LOCALSTACK=\).*$/\1false/g' $script
 
 # ################
 # docker execution

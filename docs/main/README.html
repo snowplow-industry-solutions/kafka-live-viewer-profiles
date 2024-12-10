@@ -5,7 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<title>Generating the infrastructure on AWS through Terraform</title>
+<meta name="author" content="Paulo Jeronimo">
+<title>Snowplow Live Viewer Profile</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -652,21 +653,199 @@ pre.rouge {
 }
 </style>
 </head>
-<body class="article">
+<body class="article toc2 toc-left">
 <div id="header">
-<h1>Generating the infrastructure on AWS through Terraform</h1>
+<h1>Snowplow Live Viewer Profile</h1>
+<div class="details">
+<span id="author" class="author">Paulo Jeronimo</span><br>
+<span id="email" class="email"><a href="mailto:paulo@oso.sh">paulo@oso.sh</a></span><br>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#introduction">1. Introduction</a></li>
+<li><a href="#architecture">2. Architecture</a></li>
+<li><a href="#prerequisites">3. Prerequisites</a></li>
+<li><a href="#steps-to-run-this-application-as-is">4. Steps (to run this application as is)</a>
+<ul class="sectlevel2">
+<li><a href="#step0">Step 0 &#8594; Prerequisites</a></li>
+<li><a href="#step1">Step 1 &#8594; Start the containers</a></li>
+<li><a href="#step2">Step 2 &#8594; Open http://localhost:3000 to generate the events</a></li>
+<li><a href="#step3">Step 3 &#8594; Open http://localhost:8280 to see the "Snowplow Live Viewer Profile" UI.</a></li>
+<li><a href="#step4">Step 4 &#8594; (optional) Open the LocalStack UI to see some details about the infrastructure</a></li>
+<li><a href="#step5">Step 5 &#8594; (optional) Open http://localhost:8080 to see the events exported to Kafka UI.</a></li>
+<li><a href="#step6">Step 6 &#8594; (optional) Use LazyDocker to monitor the containers and logs</a></li>
+<li><a href="#step7">Step 7 &#8594; Stop the containers</a></li>
+<li><a href="#step8">Step 8 &#8594; Clean up</a></li>
+</ul>
+</li>
+<li><a href="#demo-video">5. Demo video</a></li>
+</ul>
+</div>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph text-center">
+<p><strong><a href="README.pdf">PDF version</a></strong><br>
+<strong>Git commit with doc: dd167e6</strong></p>
+</div>
+</div>
+</div>
 <div class="sect1">
-<h2 id="_introduction">Introduction</h2>
+<h2 id="introduction"><a class="anchor" href="#introduction"></a>1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The following <a href="#steps">Steps</a> will allow you to create an infrastructure on AWS and access it.
-There is no need to manually install <a href="https://www.terraform.io/">Terraform</a>.
-It is executed via <a href="https://www.docker.com/">Docker</a> using the <code>terraform.sh</code> script.</p>
+<p>This project is a companion to the <a href="https://github.com/snowplow-incubator/snowplow-javascript-tracker-examples/tree/master/react">Snowplow JavaScript tracker demo app in React</a>.</p>
 </div>
 <div class="paragraph">
-<p>To follow these <a href="#steps">Steps</a>, ensure you have correctly configured the <code>../.env</code> file in the root of this project.</p>
+<p>It allows you to test this demo locally, using <a href="https://www.localstack.cloud/">LocalStack</a>, and in the <a href="https://aws.amazon.com">AWS</a> cloud.</p>
+</div>
+<div class="paragraph">
+<p>Its <a href="#architecture">Architecture</a> is designed so a developer can quickly and easily set up these two environments and test the project.</p>
+</div>
+<div style="page-break-after: always;"></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="architecture"><a class="anchor" href="#architecture"></a>2. Architecture</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>A user "video-viewer" accesses a URL, at <a href="http://localhost:3000" class="bare">http://localhost:3000</a>, that contains runs the <strong>"tracker-frontend"</strong> component.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>This component allows a new user "behavior-viewer" to track the state of the "video-viewer" user when viewing a video. To do this, the component emits events that identify this user behavior when the user clicks the play or pause button on the video while watching it or when an advertisement appears while viewing the video.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>The <strong>"tracker-frontend"</strong> sends events, via REST requests to <a href="http://localhost:9090" class="bare">http://localhost:9090</a>, to the <strong>"stream-collector"</strong> component.</p>
+</li>
+<li>
+<p>The <strong>"stream-collector"</strong> component sends these events via Kinesis to the "snowbridge" component.</p>
+</li>
+<li>
+<p>The <strong>"snowbridge"</strong> component enriches these events, inserts more information (via <strong>"enrich"</strong> component), and sends them via Kafka to the "live-viewer-backend" component.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Read more about the "enrich" component here: <a href="https://docs.snowplow.io/docs/pipeline-components-and-applications/enrichment-components/enrich-kinesis/" class="bare">https://docs.snowplow.io/docs/pipeline-components-and-applications/enrichment-components/enrich-kinesis/</a>.</p>
+</li>
+<li>
+<p>Read more about the "snowbridge" component here: <a href="https://docs.snowplow.io/docs/destinations/forwarding-events/snowbridge/" class="bare">https://docs.snowplow.io/docs/destinations/forwarding-events/snowbridge/</a>.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>The <strong>"live-viewer-backend"</strong>, running at <a href="http://localhost:8180" class="bare">http://localhost:8180</a>, component:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Is a Java 21 / Spring Boot 3 application.</p>
+</li>
+<li>
+<p>Uses a state machine to create a JSON object that contains information about the user&#8217;s state while viewing the video.</p>
+</li>
+<li>
+<p>Records the JSON object in a DynamoDB table.</p>
+</li>
+<li>
+<p>Sends the JSON object via WebSocket to the "live-viewer-frontend" component.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>The <strong>"live-viewer-frontend"</strong> component, running at <a href="http://localhost:8280" class="bare">http://localhost:8280</a>, is accessed by the "behavior-viewer" user. It displays the JSON received via WebSocket on its screen.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>In this way, the "behavior-viewer" user can observe the behavior of several users acting as a "video-viewer."</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p><strong>Sequence Diagram</strong> for the <a href="#architecture">Architecture</a>:</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="images/architecture.png" alt="architecture"></span></p>
+</div>
+<div class="paragraph">
+<p>All components in this <a href="#architecture">Architecture</a> run as Docker containers via <code>docker compose</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The Snowplow&#8217;s components (<strong>"stream-collector"</strong>, <strong>"enrich"</strong>, and <strong>"snowbridge"</strong>) are defined in the file <code>compose.snowplow.yaml</code>.</p>
+</li>
+<li>
+<p>Kafka&#8217;s infrastructure is provided by the file <code>compose.kafka.yaml</code>.</p>
+</li>
+<li>
+<p>The apps components (<strong>"tracker-frontend"</strong>, <strong>"live-viewer-backend"</strong>, and <strong>"live-viewer-frontend"</strong>) are defined in the file <code>compose.apps.yaml</code>.</p>
+</li>
+<li>
+<p>The infrastructure to provide the resources (Kinesis, Kafka, and DynamoDB) are provided locally, in a development environment, via <a href="https://www.localstack.cloud/">LocalStack</a>.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Read the file <code>compose.localstack.yaml</code>.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>These components and resources are created in AWS using Terraform scripts.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>There is another document, in <code>docs/terraform</code> folder, explaining the details.</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div style="page-break-after: always;"></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="prerequisites"><a class="anchor" href="#prerequisites"></a>3. Prerequisites</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This project can be build using a Linux environment.</p>
+</div>
+<div class="paragraph">
+<p>It was tested in a Ubuntu Linux (natively and inside a WSL2 machine).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="steps-to-run-this-application-as-is"><a class="anchor" href="#steps-to-run-this-application-as-is"></a>4. Steps (to run this application as is)</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="step0"><a class="anchor" href="#step0"></a>Step 0 &#8594; Prerequisites</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Start a Ubuntu Linux (it can be running on a WSL2 environment) terminal.</p>
+</li>
+<li>
+<p>Make sure you have docker (and docker compose) installed.</p>
+</li>
+<li>
+<p>Clone this project with Git and cd to it.</p>
+</li>
+</ol>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -675,107 +854,168 @@ It is executed via <a href="https://www.docker.com/">Docker</a> using the <code>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-There is a file <code>../.env.sample</code>. Copy it to <code>../.env</code> and edit the variables accordingly with your environment.
+You don&#8217;t need Java or Node.js configured on your machine to follow the steps below.
+Only a Bash terminal and a Docker installation.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="step1"><a class="anchor" href="#step1"></a>Step 1 &#8594; Start the containers</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>./up.sh</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> at any time. The docker containers will remain running.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="step2"><a class="anchor" href="#step2"></a>Step 2 &#8594; Open <a href="http://localhost:3000" class="bare">http://localhost:3000</a> to generate the events</h3>
+<div class="paragraph">
+<p>After open this link, configure the collector endpoint:</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="images/js-tracker-1.png" alt="js tracker 1"></span></p>
+</div>
+<div class="paragraph">
+<p>Open the "Custom media tracking demo":</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="images/js-tracker-2.png" alt="js tracker 2"></span></p>
+</div>
+<div class="paragraph">
+<p>You will get a page like this one:</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="images/js-tracker-3.png" alt="js tracker 3"></span></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="step3"><a class="anchor" href="#step3"></a>Step 3 &#8594; Open <a href="http://localhost:8280" class="bare">http://localhost:8280</a> to see the "Snowplow Live Viewer Profile" UI.</h3>
+<div class="paragraph">
+<p>You will notice, after some time the video was started and for after the first pause you made on it, a screen like this:</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="images/live-viewer-frontend.png" alt="live viewer frontend"></span></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="step4"><a class="anchor" href="#step4"></a>Step 4 &#8594; (optional) Open the LocalStack UI to see some details about the infrastructure</h3>
+<div class="paragraph">
+<p>Open this link: <a href="https://app.localstack.cloud/" class="bare">https://app.localstack.cloud/</a> and do the sign-in.</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="images/localstack-1.png" alt="localstack 1"></span></p>
+</div>
+<div class="paragraph">
+<p>Click on the Status button.</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="images/localstack-2.png" alt="localstack 2"></span></p>
+</div>
+<div class="paragraph">
+<p>Click on button <code>Kinesis running</code>.
+Select the <code>eu-west-2</code> region to see the Kinesis Streams:</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="images/localstack-3.png" alt="localstack 3"></span></p>
+</div>
+<div class="paragraph">
+<p>Click on button <code>Status</code> to go back to the System Status.
+Click on button <code>DynamoDB running</code>.
+You will notice a screen like this one:</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="images/localstack-4.png" alt="localstack 4"></span></p>
+</div>
+<div class="paragraph">
+<p>Navigate on the items in the table <code>video_events</code>.
+Sort the data by the <code>collector_stamp</code> to locate the last event registered before you pause the video.
+You will notice a screen like this one:</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="images/localstack-5.png" alt="localstack 5"></span></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="step5"><a class="anchor" href="#step5"></a>Step 5 &#8594; (optional) Open <a href="http://localhost:8080" class="bare">http://localhost:8080</a> to see the events exported to <a href="https://github.com/kafbat/kafka-ui">Kafka UI</a>.</h3>
+<div class="paragraph">
+<p><span class="image"><img src="images/kafka-ui.png" alt="kafka ui"></span></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="step6"><a class="anchor" href="#step6"></a>Step 6 &#8594; (optional) Use <a href="https://github.com/jesseduffield/lazydocker">LazyDocker</a> to monitor the containers and logs</h3>
+<div class="listingblock">
+<div class="content">
+<pre>$ sudo ./lazydocker.sh</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="images/lazydocker.png" alt="lazydocker"></span></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="step7"><a class="anchor" href="#step7"></a>Step 7 &#8594; Stop the containers</h3>
+<div class="paragraph">
+<p>To stop all the containers, type:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>./down.sh</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="step8"><a class="anchor" href="#step8"></a>Step 8 &#8594; Clean up</h3>
+<div class="paragraph">
+<p>To remove all the containers and images, type:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>./clean.sh</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="title">Warnings:</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>The script <code>clean.sh</code> will destroy any data generated by these containers.</p>
+</li>
+</ol>
+</div>
 </td>
 </tr>
 </table>
 </div>
 </div>
 </div>
-<div class="sect1">
-<h2 id="steps">Steps</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="step1">Step 1 &#8594; Initialize the project</h3>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>./terraform.sh init</code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="step2">Step 2 &#8594; Create the infrastructure</h3>
-<div class="listingblock">
-<div class="content">
-<pre>$ ./terraform.sh apply</pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="step3">Step 3 &#8594; Accessing the EC2 instance that run the apps in AWS</h3>
-<div class="listingblock">
-<div class="content">
-<pre>$ ./apps/ssh.sh</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Inside the EC2 instance, you can control the Docker images in a similar way you do locally:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>$ cd snowplow-demo
-
-$ ./stats.sh # &lt;- show the statistics for the docker containers
-$ ./down.sh # &lt;- stop the docker containers
-$ ./up.sh # &lt;- start the docker containers</pre>
-</div>
-</div>
-<div style="page-break-after: always;"></div>
-</div>
-</div>
 </div>
 <div class="sect1">
-<h2 id="_other_commands">Other commands</h2>
+<h2 id="demo-video"><a class="anchor" href="#demo-video"></a>5. Demo video</h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="_check_versions">Check versions</h3>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>./terraform.sh <span class="nt">--version</span>
-<span class="go">Terraform v1.10.0
-on linux_amd64
-+ provider registry.terraform.io/hashicorp/aws v5.79.0
-+ provider registry.terraform.io/hashicorp/local v2.5.2
-+ provider registry.terraform.io/hashicorp/tls v4.0.6</span></code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_check_the_terraform_plan">Check the Terraform plan</h3>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>./terraform.sh plan</code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_generate_a_png_image_for_the_terraform_modules_in_this_project">Generate a PNG image for the Terraform modules in this project</h3>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>./terraform.sh png</code></pre>
-</div>
-</div>
-<div id="png-image" class="paragraph">
-<p>Current PNG image of the available modules:</p>
-</div>
 <div class="paragraph">
-<p><span class="image"><img src="./terraform.png" alt="terraform"></span></p>
+<p>TODO</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_destroy_the_infrastructure">Destroy the infrastructure</h3>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>./terraform.sh destroy</code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div id="footer">
-<div id="footer-text">
-Last updated 2024-12-07 07:25:47 -0300
 </div>
 </div>
 </body>

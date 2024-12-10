@@ -1,5 +1,5 @@
 = Generating the infrastructure on AWS through Terraform
-:imagesdir: .
+:imagesdir: images
 :icons: font
 :source-highlighter: rouge
 :Terraform: https://www.terraform.io/[Terraform]

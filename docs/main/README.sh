@@ -2,6 +2,8 @@
 set -eou pipefail
 cd $(dirname $0)
 
+rsync -a ../images/main/ images/
+
 case "${1:-}" in
     zip)
         $0
@@ -10,6 +12,9 @@ case "${1:-}" in
         zip README.zip README.html README.pdf
         ;;
     *)
+        ./architecture/generate-images.sh
+        rsync -a ./architecture/images/ images/
+
         # https://gist.github.com/paulojeronimo/95977442a96c0c6571064d10c997d3f2
         BUILD_DIR=. \
         GENERATE_PDF=true \

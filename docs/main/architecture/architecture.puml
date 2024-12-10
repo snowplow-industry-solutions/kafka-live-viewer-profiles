@@ -1,0 +1,27 @@
+'Ref1: https://plantuml.com/sequence-diagram
+'Ref2: https://github.com/awslabs/aws-icons-for-plantuml/blob/main/examples/Sequence%20-%20Technical.puml
+
+@startuml architecture
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v18.0/dist
+!include AWSPuml/AWSCommon.puml
+!include AWSPuml/AWSSimplified.puml
+!include AWSPuml/Compute/all.puml
+!include AWSPuml/Database/DynamoDB.puml
+!include AWSPuml/Analytics/KinesisDataStreams.puml
+!include AWSPuml/ApplicationIntegration/SimpleQueueService.puml
+
+actor video_viewer
+actor behavior_viewer
+DynamoDBParticipant(dynamodb, video_events, sortkey=transaction_id+token)
+
+video_viewer -> tracker_frontend: Accesses URL and watches the video
+tracker_frontend -> stream_collector: Sends events (REST)
+stream_collector -> snowbridge: Sends events (Kinesis)
+snowbridge -> enrich: Enriches events
+enrich -> snowbridge: Returns enriched events
+snowbridge -> live_viewer_backend: Sends events (Kafka)
+live_viewer_backend -> dynamodb: Writes user state
+live_viewer_backend -> live_viewer_frontend: Sends user state (WebSocket)
+behavior_viewer -> live_viewer_frontend: Accesses and observes user state
+
+@enduml

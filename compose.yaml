@@ -1,6 +1,5 @@
 include:
   - compose.localstack.yaml
-  - compose.aws-resources.yaml
   - compose.kafka.yaml
   - compose.snowplow.yaml
   - compose.apps.yaml

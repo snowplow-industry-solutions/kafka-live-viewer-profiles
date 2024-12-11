@@ -17,9 +17,6 @@ services:
     extra_hosts:
       - localhost.localstack.cloud:host-gateway
       - host.docker.internal:host-gateway
-    depends_on:
-      aws-resources-wait:
-        condition: service_healthy
 
   enrich:
     container_name: s-enrich

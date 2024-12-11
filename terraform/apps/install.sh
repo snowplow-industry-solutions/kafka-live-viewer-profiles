@@ -50,10 +50,6 @@ do
   sed -i '/localstack\.cloud/d' $f
 done
 
-script=aws-resources/wait-for.sh
-log Configuring script $script to AWS environment ...
-sed -i 's/^\(LOCALSTACK=\).*$/\1false/g' $script
-
 # ################
 # docker execution
 newgrp docker <<EOF

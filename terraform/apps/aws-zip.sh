@@ -17,7 +17,6 @@ rm -f $zip_file
   find . -maxdepth 1 -name '*.sh' ! -name README.sh
   find . \( \
     -name .env -o \
-    -path './aws-resources/*' -o \
     -path './enrich/*' -o \
     -path './iglu-client/*' -o \
     -path './live-viewer-*/*' -o \

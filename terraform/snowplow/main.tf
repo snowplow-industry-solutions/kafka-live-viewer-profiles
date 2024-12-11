@@ -57,3 +57,13 @@ resource "aws_dynamodb_table" "snowbridge_metadata" {
     type = "S"
   }
 }
+
+resource "aws_dynamodb_table" "snowplow-enrich-kinesis" {
+  name         = "snowplow-enrich-kinesis"
+  hash_key     = "Key"
+  billing_mode = "PAY_PER_REQUEST"
+  attribute {
+    name = "Key"
+    type = "S"
+  }
+}

@@ -51,19 +51,21 @@ Its <<architecture>> is designed so a developer can quickly and easily set up th
 [[architecture]]
 == Architecture
 
-* A user "video-viewer" accesses a URL, at http://localhost:3000, that contains runs the *"tracker-frontend"* component.
-** This component allows a new user "behavior-viewer" to track the state of the "video-viewer" user when viewing a video. To do this, the component emits events that identify this user behavior when the user clicks the play or pause button on the video while watching it or when an advertisement appears while viewing the video.
-* The *"tracker-frontend"* sends events, via REST requests to http://localhost:9090, to the *"stream-collector"* component.
-* The *"stream-collector"* component sends these events via Kinesis to the "snowbridge" component.
-* The *"snowbridge"* component enriches these events, inserts more information (via *"enrich"* component), and sends them via Kafka to the "live-viewer-backend" component.
-** Read more about the "enrich" component here: https://docs.snowplow.io/docs/pipeline-components-and-applications/enrichment-components/enrich-kinesis/.
-** Read more about the "snowbridge" component here: https://docs.snowplow.io/docs/destinations/forwarding-events/snowbridge/.
-* The *"live-viewer-backend"*, running at http://localhost:8180, component:
+* [[tracker-frontend]] A user "video-viewer" accesses a URL, at http://localhost:3000, that contains runs the *tracker-frontend* component. This component,
+** Is a instance of {snowplow-javascript-tracker-demo}.
+** Allows a new user "behavior-viewer" to track the state of the "video-viewer" user when viewing a video. To do this, the component emits events that identify this user behavior when the user clicks the play or pause button on the video while watching it or when an advertisement appears while viewing the video.
+** Sends events, via REST requests to http://localhost:9090, to the *<<stream-collector>>* component.
+* [[stream-collector]] The *stream-collector* component sends these events via Kinesis to the *<<snowbridge>>* component.
+* [[snowbridge]] The *snowbridge* component enriches these events, inserts more information (via *<<enrich>>* component), and sends them via Kafka to the *<<live-viewer-backend>>* component.
+** [[enrich]] Read more about the *enrich* component here: https://docs.snowplow.io/docs/pipeline-components-and-applications/enrichment-components/enrich-kinesis/.
+** Read more about the *snowbridge* component here: https://docs.snowplow.io/docs/destinations/forwarding-events/snowbridge/.
+* [[live-viewer-backend]] The *live-viewer-backend*, running at http://localhost:8180, component:
 ** Is a Java 21 / Spring Boot 3 application.
+** Consumes *<<snowbridge>>* events sent from Kafka.
 ** Uses a state machine to create a JSON object that contains information about the user's state while viewing the video.
 ** Records the JSON object in a DynamoDB table.
-** Sends the JSON object via WebSocket to the "live-viewer-frontend" component.
-* The *"live-viewer-frontend"* component, running at http://localhost:8280, is accessed by the "behavior-viewer" user. It displays the JSON received via WebSocket on its screen.
+** Sends the JSON object via WebSocket to the *<<live-viewer-frontend>>* component.
+* [[live-viewer-frontend]] The *live-viewer-frontend* component, running at http://localhost:8280, is accessed by the "behavior-viewer" user. It displays the JSON received via WebSocket on its screen.
 ** In this way, the "behavior-viewer" user can observe the behavior of several users acting as a "video-viewer."
 
 <<<
@@ -74,12 +76,12 @@ image:architecture.png[]
 
 All components in this <<architecture>> run as Docker containers via `docker compose`:
 
-* The Snowplow's components (*"stream-collector"*, *"enrich"*, and *"snowbridge"*) are defined in the file `compose.snowplow.yaml`.
-* Kafka's infrastructure is provided by the file `compose.kafka.yaml`.
-* The apps components (*"tracker-frontend"*, *"live-viewer-backend"*, and *"live-viewer-frontend"*) are defined in the file `compose.apps.yaml`.
-* The infrastructure to provide the resources (Kinesis, Kafka, and DynamoDB) are provided locally, in a development environment, via {LocalStack}.
+* [[compose-snowplow]] The Snowplow's components (*<<stream-collector>>*, *<<enrich>>*, and *<<snowbridge>>*) are defined in the file `compose.snowplow.yaml`.
+* [[compose-kafka]] Kafka's infrastructure is provided by the file `compose.kafka.yaml`.
+* [[compose-apps]] The apps components (*<<tracker-frontend>>*, *<<live-viewer-backend>>*, and *<<live-viewer-frontend>>*) are defined in the file `compose.apps.yaml`.
+* [[compose-localstack]] The infrastructure to provide the resources (Kinesis, Kafka, and DynamoDB) are provided locally, in a development environment, via {LocalStack}.
 ** Read the file `compose.localstack.yaml`.
-* These components and resources are created in AWS using Terraform scripts.
+* [[terraform]] These components and resources are created in AWS using Terraform scripts.
 ** There is another document, in `docs/terraform` folder, explaining the details.
 
 <<<
@@ -115,7 +117,9 @@ TIP: You can press kbd:[Ctrl+C] at any time. The docker containers will remain r
 [[step2]]
 === Step 2 -> Open http://localhost:3000 to generate the events
 
-After open this link, configure the collector endpoint:
+As pointed in the <<architecture>>, this is a instance of <<tracker-frontend>> component, configured in <<compose-apps>>.
+
+After open the link above, configure the <<stream-collector>> endpoint:
 
 image:js-tracker-1.png[]
 
@@ -130,12 +134,16 @@ image:js-tracker-3.png[]
 [[step3]]
 === Step 3 -> Open http://localhost:8280 to see the "Snowplow Live Viewer Profile" UI.
 
+In the <<architecture>> this is the <<live-viewer-frontend>> component, configured in <<compose-apps>>.
+
 You will notice, after some time the video was started and for after the first pause you made on it, a screen like this:
 
 image:live-viewer-frontend.png[]
 
 [[step4]]
 === Step 4 -> (optional) Open the LocalStack UI to see some details about the infrastructure
+
+You may note that this is a component of <<compose-localstack>>.
 
 Open this link: https://app.localstack.cloud/ and do the sign-in.
 
@@ -164,6 +172,8 @@ image:localstack-5.png[]
 
 [[step5]]
 === Step 5 -> (optional) Open http://localhost:8080 to see the events exported to {KafkaUI}.
+
+You may note that this is a component of <<compose-kafka>>.
 
 image:kafka-ui.png[]
 

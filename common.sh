@@ -2,13 +2,18 @@
 
 show_logs=${show_logs:-true}
 
-list_services() { yq -r '.services | keys[]' compose.$1.yaml | paste -sd ' ' -; }
+list-services() {
+  command -v yq &> /dev/null || {
+    echo Install yq before using this option!
+    exit 1
+  }
+  yq -r '.services | keys[]' compose.$1.yaml | paste -sd ' ' -
+}
 
-localstack-services() { list_services localstack; }
-aws-resources-services() { list_services aws-resources; }
-kafka-services() { list_services kafka; }
-snowplow-services() { list_services snowplow; }
-apps-services() { list_services apps; }
+list-available-services() {
+  declare -F | sed -n 's/.*_\(.*\)-services.*/\1/p'
+  exit 0
+}
 
 set-services() {
   services=
@@ -28,4 +33,10 @@ show-services() {
     echo $op all services ...
 }
 
-! [[ "${1:-}" =~ -services$ ]] || set -- $($1)
+for service in compose.*.yaml
+do
+  service=$(cut -d. -f2 <<< $service)
+  eval "_$service-services() { list-services $service; }"
+done
+! [ "${1:-}" = services ] || list-available-services
+! [[ "${1:-}" =~ -services$ ]] || set -- $(_$1)

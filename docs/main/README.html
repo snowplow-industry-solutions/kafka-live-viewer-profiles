@@ -665,8 +665,7 @@ pre.rouge {
 <ul class="sectlevel1">
 <li><a href="#introduction">1. Introduction</a></li>
 <li><a href="#architecture">2. Architecture</a></li>
-<li><a href="#prerequisites">3. Prerequisites</a></li>
-<li><a href="#steps-to-run-this-application-as-is">4. Steps (to run this application as is)</a>
+<li><a href="#steps">3. Steps (to run this application as is)</a>
 <ul class="sectlevel2">
 <li><a href="#step0">Step 0 &#8594; Prerequisites</a></li>
 <li><a href="#step1">Step 1 &#8594; Start the containers</a></li>
@@ -679,7 +678,7 @@ pre.rouge {
 <li><a href="#step8">Step 8 &#8594; Clean up</a></li>
 </ul>
 </li>
-<li><a href="#demo-video">5. Demo video</a></li>
+<li><a href="#demo-video">4. Demo video</a></li>
 </ul>
 </div>
 </div>
@@ -688,7 +687,7 @@ pre.rouge {
 <div class="sectionbody">
 <div class="paragraph text-center">
 <p><strong><a href="README.pdf">PDF version</a></strong><br>
-<strong>Git commit with doc: f2afaf9</strong></p>
+<strong>Git commit with doc: 36dad3c</strong></p>
 </div>
 </div>
 </div>
@@ -825,18 +824,7 @@ pre.rouge {
 </div>
 </div>
 <div class="sect1">
-<h2 id="prerequisites"><a class="anchor" href="#prerequisites"></a>3. Prerequisites</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>This project can be build using a Linux environment.</p>
-</div>
-<div class="paragraph">
-<p>It was tested in a Ubuntu Linux (natively and inside a WSL2 machine).</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="steps-to-run-this-application-as-is"><a class="anchor" href="#steps-to-run-this-application-as-is"></a>4. Steps (to run this application as is)</h2>
+<h2 id="steps"><a class="anchor" href="#steps"></a>3. Steps (to run this application as is)</h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="step0"><a class="anchor" href="#step0"></a>Step 0 &#8594; Prerequisites</h3>
@@ -850,6 +838,9 @@ pre.rouge {
 </li>
 <li>
 <p>Clone this project with Git and cd to it.</p>
+</li>
+<li>
+<p>Create a file <code>.env</code> (from <code>.env.example</code>) and configure the AWS variables on it.</p>
 </li>
 </ol>
 </div>
@@ -881,7 +872,49 @@ Only a Bash terminal and a Docker installation.
 <i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
-You can press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> at any time. The docker containers will remain running.
+<div class="title">Tips:</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>You can press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> at any time. The docker containers will remain running.</p>
+</li>
+<li>
+<p>If there is no file <code>.env</code> in the project, this script will try to locate it in a file with the of the project&#8217;s folder and a extension <code>.env</code>.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>So, it will copy the file <code>../snowplow-live-viewer-profile-generator.env</code> to <code>.env</code>.
+This allows you to call <code>git clean -fdX</code> at any time you want without losing your configuration.</p>
+</li>
+<li>
+<p>If the file <code>../snowplow-live-viewer-profile-generator.env</code> does not exists, it will copy the file <code>.env.example</code> to <code>.env</code> and use it.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>You can pass "services" as an argument option to this script. It will list the options you can pass to it by adding the suffix "-services":</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ ./up.sh services
+apps
+kafka
+localstack
+snowplow</pre>
+</div>
+</div>
+</li>
+<li>
+<p>By adding the "-services" to one of the options listed above, you will start only the services listed in the file <code>copose.&lt;service&gt;.yaml</code>.
+So, this will start only the kafka services (services listed in <code>compose.kafka.yaml</code>):</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ ./up.sh kafka-services</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
 </td>
 </tr>
 </table>
@@ -1028,7 +1061,7 @@ You will notice a screen like this one:</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="demo-video"><a class="anchor" href="#demo-video"></a>5. Demo video</h2>
+<h2 id="demo-video"><a class="anchor" href="#demo-video"></a>4. Demo video</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>TODO</p>

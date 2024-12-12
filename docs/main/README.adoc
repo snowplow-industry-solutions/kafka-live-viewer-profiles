@@ -85,12 +85,7 @@ All components in this <<architecture>> run as Docker containers via `docker com
 ** There is another document, in `docs/terraform` folder, explaining the details.
 
 <<<
-== Prerequisites
-
-This project can be build using a Linux environment.
-
-It was tested in a Ubuntu Linux (natively and inside a WSL2 machine).
-
+[[steps]]
 == Steps (to run this application as is)
 :numbered!:
 
@@ -100,6 +95,7 @@ It was tested in a Ubuntu Linux (natively and inside a WSL2 machine).
 . Start a Ubuntu Linux (it can be running on a WSL2 environment) terminal.
 . Make sure you have docker (and docker compose) installed.
 . Clone this project with Git and cd to it.
+. Create a file `.env` (from `.env.example`) and configure the AWS variables on it.
 
 NOTE: You don't need Java or Node.js configured on your machine to follow the steps below.
 Only a Bash terminal and a Docker installation.
@@ -112,7 +108,31 @@ Only a Bash terminal and a Docker installation.
 $ ./up.sh
 ----
 
-TIP: You can press kbd:[Ctrl+C] at any time. The docker containers will remain running.
+[TIP]
+.Tips:
+====
+. You can press kbd:[Ctrl+C] at any time. The docker containers will remain running.
+. If there is no file `.env` in the project, this script will try to locate it in a file with the of the project's folder and a extension `.env`.
+.. So, it will copy the file `../snowplow-live-viewer-profile-generator.env` to `.env`.
+This allows you to call `git clean -fdX` at any time you want without losing your configuration.
+.. If the file `../snowplow-live-viewer-profile-generator.env` does not exists, it will copy the file `.env.example` to `.env` and use it.
+. You can pass "services" as an argument option to this script. It will list the options you can pass to it by adding the suffix "-services":
++
+----
+$ ./up.sh services
+apps
+kafka
+localstack
+snowplow
+----
++
+. By adding the "-services" to one of the options listed above, you will start only the services listed in the file `copose.<service>.yaml`.
+So, this will start only the kafka services (services listed in `compose.kafka.yaml`):
++
+----
+$ ./up.sh kafka-services
+----
+====
 
 [[step2]]
 === Step 2 -> Open http://localhost:3000 to generate the events

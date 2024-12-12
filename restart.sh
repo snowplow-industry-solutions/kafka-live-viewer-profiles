@@ -2,6 +2,7 @@
 set -eou pipefail
 cd $(dirname $0)
 
-./clean.sh "$@"
+./down.sh "$@"
+./clean.sh
 ./build.sh "$@"
 ./up.sh "$@"

@@ -6,4 +6,4 @@ source ./common.sh
 set-services "$@"
 show-services Stopping
 
-docker compose down ${services:-}
+docker compose down -v ${services:-}

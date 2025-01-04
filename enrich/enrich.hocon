@@ -1,0 +1,129 @@
+{
+  "license": {
+    "accept": ${ACCEPT_LICENSE}
+  }
+
+  "input": {
+    "type": "Kinesis"
+    "appName": "snowplow-enrich-kinesis"
+    "streamName": "collector-good"
+    "region": ${AWS_REGION}
+    "customEndpoint": "http://localhost.localstack.cloud:4566"
+    "initialPosition": {
+      "type": "LATEST"
+    }
+    "retrievalMode": {
+      "type": "Polling"
+      "maxRecords": 1
+    }
+    "bufferSize": 3
+    "checkpointBackoff": {
+      "minBackoff": 100 milliseconds
+      "maxBackoff": 10 seconds
+      "maxRetries": 10
+    }
+    "dynamodbCustomEndpoint": "http://localhost.localstack.cloud:4566"
+    "cloudwatchCustomEndpoint": "http://localhost.localstack.cloud:4566"
+  }
+
+  "output": {
+    "good": {
+      "type": "Kinesis"
+      "streamName": "enriched-good"
+      "region": ${AWS_REGION}
+      "customEndpoint": "localhost.localstack.cloud:4566"
+      "backoffPolicy": {
+        "minBackoff": 100 milliseconds
+        "maxBackoff": 10 seconds
+        "maxRetries": 10
+      }
+      "throttledBackoffPolicy": {
+        "minBackoff": 100 milliseconds
+        "maxBackoff": 1 second
+      }
+      "recordLimit": 5
+      "byteLimit": 5242880
+    }
+
+    "pii": {
+      "type": "Kinesis"
+      "streamName": "pii"
+      "region": ${AWS_REGION}
+      "backoffPolicy": {
+        "minBackoff": 100 milliseconds
+        "maxBackoff": 10 seconds
+        "maxRetries": 10
+      }
+      "throttledBackoffPolicy": {
+        "minBackoff": 100 milliseconds
+        "maxBackoff": 1 second
+      }
+      "recordLimit": 500
+      "byteLimit": 5242880
+      "customEndpoint": "localhost.localstack.cloud:4566"
+    }
+
+    "bad": {
+      "type": "Kinesis"
+      "streamName": "enriched-bad"
+      "region": ${AWS_REGION}
+      "customEndpoint": "localhost.localstack.cloud:4566"
+      "backoffPolicy": {
+        "minBackoff": 100 milliseconds
+        "maxBackoff": 10 seconds
+        "maxRetries": 10
+      }
+      "throttledBackoffPolicy": {
+        "minBackoff": 100 milliseconds
+        "maxBackoff": 1 second
+      }
+      "recordLimit": 500
+      "byteLimit": 5242880
+    }
+
+    "incomplete": {
+      "type": "Kinesis"
+      "streamName": "enriched-incomplete"
+      "region": ${AWS_REGION}
+      "customEndpoint": "localhost.localstack.cloud:4566"
+      "backoffPolicy": {
+        "minBackoff": 100 milliseconds
+        "maxBackoff": 10 seconds
+        "maxRetries": 10
+      }
+      "throttledBackoffPolicy": {
+        "minBackoff": 100 milliseconds
+        "maxBackoff": 1 second
+      }
+      "recordLimit": 500
+      "byteLimit": 5242880
+    }
+  }
+  "concurrency" : {
+    "enrich": 256
+    "sink": 1
+  }
+  "assetsUpdatePeriod": "7 days"
+  "remoteAdapters": {
+    "connectionTimeout": "10 seconds",
+    "readTimeout": "45 seconds",
+    "maxConnections": 10,
+    "configs": []
+  }
+
+  "telemetry": {
+    "disable": true
+  }
+
+  "featureFlags" : {
+    "acceptInvalid": false
+    "legacyEnrichmentOrder": false
+    "tryBase64Decoding": false
+  }
+  
+  "validation": {
+    "atomicFieldsLimits": {
+        "mkt_clickid": 100000
+    }
+  }
+}

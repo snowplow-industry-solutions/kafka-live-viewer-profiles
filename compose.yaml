@@ -1,0 +1,5 @@
+include:
+  - compose.localstack.yaml
+  - compose.kafka.yaml
+  - compose.snowplow.yaml
+  - compose.apps.yaml

@@ -1,0 +1,29 @@
+'Ref1: https://plantuml.com/sequence-diagram
+'Ref2: https://github.com/awslabs/aws-icons-for-plantuml/blob/main/examples/Sequence%20-%20Technical.puml
+
+@startuml architecture
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v18.0/dist
+!include AWSPuml/AWSCommon.puml
+!include AWSPuml/Database/DynamoDB.puml
+
+actor "video-viewer"
+actor "behavior-viewer"
+boundary "tracker-frontend"
+boundary "live-viewer-frontend"
+control "stream-collector"
+control "snowbridge"
+control "enrich"
+control "live-viewer-backend"
+DynamoDBParticipant(dynamodb, video_events, sortkey=collector_tstamp)
+
+"video-viewer" -> "tracker-frontend": Accesses URL and watches the video
+"tracker-frontend" -> "stream-collector": Sends events (via REST requests)
+"stream-collector" -> snowbridge: Sends events (via Kinesis)
+snowbridge -> enrich: Enriches events
+enrich -> snowbridge: Returns enriched events
+snowbridge -> "live-viewer-backend": Sends events (via Kafka)
+"live-viewer-backend" -> dynamodb: Writes user state
+"live-viewer-backend" -> "live-viewer-frontend": Sends user state (via WebSocket)
+"behavior-viewer" -> "live-viewer-frontend": Accesses and observes user state
+
+@enduml

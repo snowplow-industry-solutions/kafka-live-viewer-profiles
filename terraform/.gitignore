@@ -1,0 +1,8 @@
+.image-built
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+keypair.pem
+snowplow-demo.zip
+ssh.sh
+terraform.dot

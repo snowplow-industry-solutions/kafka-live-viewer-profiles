@@ -1,0 +1,34 @@
+collector {
+  license {
+    accept = ${ACCEPT_LICENSE}
+  }
+
+  interface = "0.0.0.0"
+  port = 8080
+
+  streams {
+    good {
+      name = "collector-good"
+      region = ${AWS_REGION}
+      customEndpoint = "localhost.localstack.cloud:4566"
+      aws {
+         accessKey = ${AWS_ACCESS_KEY_ID}
+         secretKey = ${AWS_SECRET_ACCESS_KEY}
+      }
+    }
+    
+    bad {
+      name = "collector-bad"
+      region = ${AWS_REGION}
+      customEndpoint = "localhost.localstack.cloud:4566"
+      aws {
+         accessKey = ${AWS_ACCESS_KEY_ID}
+         secretKey = ${AWS_SECRET_ACCESS_KEY}
+      }
+    }
+
+    telemetry {
+      disable = true
+    }
+  }
+}

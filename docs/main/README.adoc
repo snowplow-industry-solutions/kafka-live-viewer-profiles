@@ -1,0 +1,239 @@
+= Snowplow Live Viewer Profile
+Paulo Jeronimo <paulo@oso.sh>
+:experimental:
+:icons: font
+:idprefix:
+:idseparator: -
+:imagesdir: images
+:numbered:
+:sectanchors:
+:source-highlighter: rouge
+:toc: left
+ifdef::backend-pdf[]
+:toc-title!:
+:toc: macro
+endif::[]
+ifdef::backend-html5[]
+:nofooter:
+endif::[]
+// Other attributes
+:snowplow-javascript-tracker-demo: https://github.com/snowplow-incubator/snowplow-javascript-tracker-examples/tree/master/react[Snowplow JavaScript tracker demo app in React] 
+:KafkaUI: https://github.com/kafbat/kafka-ui[Kafka UI]
+:AWS: https://aws.amazon.com[AWS]
+:LocalStack: https://www.localstack.cloud/[LocalStack]
+:LazyDocker: https://github.com/jesseduffield/lazydocker[LazyDocker]
+
+ifdef::backend-pdf[]
+[.text-center]
+*Author: {author} ({email})* +
+*Git commit with doc: {git-commit}* +
+*link:README.html[HTML version]*
+
+****
+toc::[]
+****
+endif::[]
+ifdef::backend-html5[]
+[.text-center]
+*link:README.pdf[PDF version]* +
+*Git commit with doc: {git-commit}*
+endif::[]
+
+== Introduction
+
+This project is a companion to the {snowplow-javascript-tracker-demo}.
+
+It allows you to test this demo locally, using {LocalStack}, and in the {AWS} cloud.
+
+Its <<architecture>> is designed so a developer can quickly and easily set up these two environments and test the project.
+
+<<<
+[[architecture]]
+== Architecture
+
+* [[tracker-frontend]] A user "video-viewer" accesses a URL, at http://localhost:3000, that contains runs the *tracker-frontend* component. This component,
+** Is a instance of {snowplow-javascript-tracker-demo}.
+** Allows a new user "behavior-viewer" to track the state of the "video-viewer" user when viewing a video. To do this, the component emits events that identify this user behavior when the user clicks the play or pause button on the video while watching it or when an advertisement appears while viewing the video.
+** Sends events, via REST requests to http://localhost:9090, to the *<<stream-collector>>* component.
+* [[stream-collector]] The *stream-collector* component sends these events via Kinesis to the *<<snowbridge>>* component.
+* [[snowbridge]] The *snowbridge* component enriches these events, inserts more information (via *<<enrich>>* component), and sends them via Kafka to the *<<live-viewer-backend>>* component.
+** [[enrich]] Read more about the *enrich* component here: https://docs.snowplow.io/docs/pipeline-components-and-applications/enrichment-components/enrich-kinesis/.
+** Read more about the *snowbridge* component here: https://docs.snowplow.io/docs/destinations/forwarding-events/snowbridge/.
+* [[live-viewer-backend]] The *live-viewer-backend*, running at http://localhost:8180, component:
+** Is a Java 21 / Spring Boot 3 application.
+** Consumes *<<snowbridge>>* events sent from Kafka.
+** Uses a state machine to create a JSON object that contains information about the user's state while viewing the video.
+** Records the JSON object in a DynamoDB table.
+** Sends the JSON object via WebSocket to the *<<live-viewer-frontend>>* component.
+* [[live-viewer-frontend]] The *live-viewer-frontend* component, running at http://localhost:8280, is accessed by the "behavior-viewer" user. It displays the JSON received via WebSocket on its screen.
+** In this way, the "behavior-viewer" user can observe the behavior of several users acting as a "video-viewer."
+
+<<<
+
+*Sequence Diagram* for the <<architecture>>:
+
+image:architecture.png[]
+
+All components in this <<architecture>> run as Docker containers via `docker compose`:
+
+* [[compose-snowplow]] The Snowplow's components (*<<stream-collector>>*, *<<enrich>>*, and *<<snowbridge>>*) are defined in the file `compose.snowplow.yaml`.
+* [[compose-kafka]] Kafka's infrastructure is provided by the file `compose.kafka.yaml`.
+* [[compose-apps]] The apps components (*<<tracker-frontend>>*, *<<live-viewer-backend>>*, and *<<live-viewer-frontend>>*) are defined in the file `compose.apps.yaml`.
+* [[compose-localstack]] The infrastructure to provide the resources (Kinesis, Kafka, and DynamoDB) are provided locally, in a development environment, via {LocalStack}.
+** Read the file `compose.localstack.yaml`.
+* [[terraform]] These components and resources are created in AWS using Terraform scripts.
+** There is another document, in `docs/terraform` folder, explaining the details.
+
+<<<
+[[steps]]
+== Steps (to run this application as is)
+:numbered!:
+
+[[step0]]
+=== Step 0 -> Prerequisites
+
+. Start a Ubuntu Linux (it can be running on a WSL2 environment) terminal.
+. Make sure you have docker (and docker compose) installed.
+. Clone this project with Git and cd to it.
+. Create a file `.env` (from `.env.example`) and configure the AWS variables on it.
+
+NOTE: You don't need Java or Node.js configured on your machine to follow the steps below.
+Only a Bash terminal and a Docker installation.
+
+[[step1]]
+=== Step 1 -> Start the containers
+
+[,console]
+----
+$ ./up.sh
+----
+
+[TIP]
+.Tips:
+====
+. You can press kbd:[Ctrl+C] at any time. The docker containers will remain running.
+. If there is no file `.env` in the project, this script will try to locate it in a file with the of the project's folder and a extension `.env`.
+.. So, it will copy the file `../snowplow-live-viewer-profile-generator.env` to `.env`.
+This allows you to call `git clean -fdX` at any time you want without losing your configuration.
+.. If the file `../snowplow-live-viewer-profile-generator.env` does not exists, it will copy the file `.env.example` to `.env` and use it.
+. You can pass "services" as an argument option to this script. It will list the options you can pass to it by adding the suffix "-services":
++
+----
+$ ./up.sh services
+apps
+kafka
+localstack
+snowplow
+----
++
+. By adding the "-services" to one of the options listed above, you will start only the services listed in the file `copose.<service>.yaml`.
+So, this will start only the kafka services (services listed in `compose.kafka.yaml`):
++
+----
+$ ./up.sh kafka-services
+----
+====
+
+[[step2]]
+=== Step 2 -> Open http://localhost:3000 to generate the events
+
+As pointed in the <<architecture>>, this is a instance of <<tracker-frontend>> component, configured in <<compose-apps>>.
+
+After open the link above, configure the <<stream-collector>> endpoint:
+
+image:js-tracker-1.png[]
+
+Open the "Custom media tracking demo":
+
+image:js-tracker-2.png[]
+
+You will get a page like this one:
+
+image:js-tracker-3.png[]
+
+[[step3]]
+=== Step 3 -> Open http://localhost:8280 to see the "Snowplow Live Viewer Profile" UI.
+
+In the <<architecture>> this is the <<live-viewer-frontend>> component, configured in <<compose-apps>>.
+
+You will notice, after some time the video was started and for after the first pause you made on it, a screen like this:
+
+image:live-viewer-frontend.png[]
+
+[[step4]]
+=== Step 4 -> (optional) Open the LocalStack UI to see some details about the infrastructure
+
+You may note that this is a component of <<compose-localstack>>.
+
+Open this link: https://app.localstack.cloud/ and do the sign-in.
+
+image:localstack-1.png[]
+
+Click on the Status button.
+
+image:localstack-2.png[]
+
+Click on button `Kinesis running`.
+Select the `eu-west-2` region to see the Kinesis Streams:
+
+image:localstack-3.png[]
+
+Click on button `Status` to go back to the System Status.
+Click on button `DynamoDB running`.
+You will notice a screen like this one:
+
+image:localstack-4.png[]
+
+Navigate on the items in the table `video_events`.
+Sort the data by the `collector_stamp` to locate the last event registered before you pause the video.
+You will notice a screen like this one:
+
+image:localstack-5.png[]
+
+[[step5]]
+=== Step 5 -> (optional) Open http://localhost:8080 to see the events exported to {KafkaUI}.
+
+You may note that this is a component of <<compose-kafka>>.
+
+image:kafka-ui.png[]
+
+[[step6]]
+=== Step 6 -> (optional) Use {LazyDocker} to monitor the containers and logs
+
+----
+$ sudo ./lazydocker.sh
+----
+
+image:lazydocker.png[]
+
+[[step7]]
+=== Step 7 -> Stop the containers
+
+To stop all the containers, type:
+
+[,console]
+----
+$ ./down.sh
+----
+
+[[step8]]
+=== Step 8 -> Clean up
+
+To remove all the containers and images, type:
+
+[,console]
+----
+$ ./clean.sh
+----
+
+[WARNING]
+.Warnings:
+====
+. The script `clean.sh` will destroy any data generated by these containers.
+====
+
+:numbered:
+
+== Demo video
+
+TODO

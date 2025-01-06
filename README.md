@@ -8,7 +8,7 @@ A [Snowplow solution accelerator][solution-accelerators] showing how to build a 
 
 ## Quickstart
 
-The project's documents are available in the docs folder.
+To get started, head to our [Kafka Live Viewer Profiles: Introduction][guide-intro] in the Snowplow Documentation site.
 
 ## Special thanks
 
@@ -39,3 +39,5 @@ limitations under the License.
 
 [license]: https://www.apache.org/licenses/LICENSE-2.0
 [license-image]: https://img.shields.io/github/license/snowplow/snowplow-android-tracker
+
+[guide-intro]: https://docs.snowplow.io/tutorials/kafka-live-viewer-profiles/introduction

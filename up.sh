@@ -19,6 +19,6 @@ f=./.env; [ -f $f ] || {
 }
 unset f g
 
-docker compose up ${services:-} -d
+docker compose up ${services:-} --build -d
 
 ! $show_logs || ./logs.sh "$@"

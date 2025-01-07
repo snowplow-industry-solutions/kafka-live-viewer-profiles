@@ -36,7 +36,7 @@ transform {
 
 target {
   use "kafka" {
-    brokers    = "kafka:9093"
+    brokers    = "kafka:9094"
     topic_name = "snowplow-enriched-good"
   }
 }

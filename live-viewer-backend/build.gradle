@@ -35,6 +35,12 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
+
+    constraints {
+        implementation('org.apache.kafka:kafka-clients:3.9.1') {
+            because 'We need version 3.9.1 of kafka-clients'
+        }
+    }
 }
 
 dependencyManagement {

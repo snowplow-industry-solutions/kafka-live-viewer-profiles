@@ -1,0 +1,4 @@
+spring:
+  kafka:
+    consumer:
+      topics: snowplow-enriched-good

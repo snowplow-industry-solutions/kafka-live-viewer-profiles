@@ -1,19 +1,19 @@
 services:
   tracker-frontend:
     container_name: s-tracker
-    build: tracker-frontend
+    build: ../tracker-frontend
     ports:
       - 3000:80
 
   live-viewer-frontend:
     container_name: s-viewer
-    build: live-viewer-frontend
+    build: ../live-viewer-frontend
     ports:
       - 8280:80
 
   live-viewer-backend:
     container_name: s-backend
-    build: live-viewer-backend
+    build: ../live-viewer-backend
     ports:
       - 8180:8080
     environment:

@@ -4,6 +4,7 @@ import java.net.URI;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import com.snowplowanalytics.liveviewerprofile.model.VideoEvent;
 
@@ -15,9 +16,10 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder;
 
 @Configuration
+@Profile("!test-kafka")
 public class DynamoDBConfig extends AWSClientConfig {
 
-  @Value("${aws.dynamodb.endpoint}")
+  @Value("${aws.dynamodb.endpoint:http://localhost:4566}")
   private String awsDynamoDBEndPoint;
 
   @Bean
@@ -38,7 +40,7 @@ public class DynamoDBConfig extends AWSClientConfig {
   }
 
   @Bean
-  public DynamoDbTable videoEventTable(DynamoDbEnhancedClient dynamoDbClient) {
+  public DynamoDbTable<VideoEvent> videoEventTable(DynamoDbEnhancedClient dynamoDbClient) {
     return dynamoDbClient.table("video_events", TableSchema.fromBean(VideoEvent.class));
   }
 

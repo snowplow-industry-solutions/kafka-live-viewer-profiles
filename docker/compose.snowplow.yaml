@@ -13,7 +13,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - SNOWBRIDGE_CONFIG_FILE=/config/snowbridge-config.hcl
     volumes:
-      - ./stream-collector/config.hocon:/snowplow/collector/config.hocon
+      - ../stream-collector/config.hocon:/snowplow/collector/config.hocon
     extra_hosts:
       - localhost.localstack.cloud:host-gateway
       - host.docker.internal:host-gateway
@@ -30,8 +30,8 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL:-}
     volumes:
-      - ./enrich:/snowplow/enrich
-      - ./iglu-client:/snowplow/iglu-client
+      - ../enrich:/snowplow/enrich
+      - ../iglu-client:/snowplow/iglu-client
     extra_hosts:
       - localhost.localstack.cloud:host-gateway
       - host.docker.internal:host-gateway
@@ -52,7 +52,7 @@ services:
       - JS_SCRIPT_PATH=/snowbridge/video-data.js
       - SNOWBRIDGE_CONFIG_FILE=/snowbridge/config.hcl
     volumes:
-      - ./snowbridge:/snowbridge
+      - ../snowbridge:/snowbridge
     extra_hosts:
       - localhost.localstack.cloud:host-gateway
       - host.docker.internal:host-gateway

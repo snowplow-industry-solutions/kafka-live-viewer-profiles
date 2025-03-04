@@ -3,7 +3,7 @@ services:
     image: apache/kafka:3.9.0
     restart: always
     ports:
-      - 9092:9092
+      - 9094:9094
     hostname: kafka-broker-1
     container_name: s-kafka
     environment:
@@ -24,25 +24,36 @@ services:
       KAFKA_PROCESS_ROLES: controller,broker
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
       KAFKA_LOG_DIRS: /var/lib/kafka/data
-      AUTO_CREATE_TOPICS_ENABLE: 'true'
+      AUTO_CREATE_TOPICS_ENABLE: "true"
     volumes:
       - kafka_data:/var/lib/kafka/data
     healthcheck:
-      test: [ "CMD", "bash", "-c", "kafka-topics --bootstrap-server kafka:9094 --list | grep -q snowplow-enriched-good" ]
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9094 --list | grep -q snowplow-enriched-good",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
 
   kafka-init:
     container_name: s-kafka-init
-    image: bitnami/kafka:3.9.0
+    image: apache/kafka:3.9.0
     depends_on:
       kafka:
         condition: service_started
+    working_dir: /opt/kafka/bin
     entrypoint: >
       bash -c "
-        echo 'echo Trying to create topics...'
-        kafka-topics.sh --create --if-not-exists  --bootstrap-server kafka:9094 --partitions 1 --replication-factor 1 --topic snowplow-enriched-good
+        echo 'Waiting for Kafka to be ready ...'
+        while ! nc -z kafka 9094; do
+          sleep 1
+        done
+        echo 'Kafka is ready. Creating required topics ...'
+        ./kafka-topics.sh --create --if-not-exists --topic snowplow-enriched-good --bootstrap-server kafka:9094 --replication-factor 1 --partitions 1
       "
     restart: on-failure
 

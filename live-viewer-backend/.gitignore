@@ -5,3 +5,6 @@ build
 .factorypath
 .project
 .settings
+logs/
+README.html
+README.pdf

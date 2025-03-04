@@ -6,7 +6,8 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 import java.time.Instant;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,16 +19,18 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import com.snowplowanalytics.liveviewerprofile.model.VideoEvent;
-import static com.snowplowanalytics.liveviewerprofile.service.VideoStateMachine.State.WATCHING_AD;
-import static com.snowplowanalytics.liveviewerprofile.service.VideoStateMachine.State.WATCHING_VIDEO;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
-@Disabled // TODO: Fix this test
 @Testcontainers
 @SpringBootTest
+@Tag("integration")
 class VideoEventRepositoryIntegrationTest {
 
+    @SuppressWarnings("resource")
     @Container
-    static LocalStackContainer localstack = new LocalStackContainer(DockerImageName.parse("localstack/localstack"))
+    static final LocalStackContainer localstack = new LocalStackContainer(DockerImageName.parse("localstack/localstack"))
             .withServices(DYNAMODB)
             .withExposedPorts(4566);
 
@@ -42,14 +45,25 @@ class VideoEventRepositoryIntegrationTest {
     @Autowired
     private VideoEventRepository videoEventRepository;
 
+    @Autowired
+    private DynamoDbEnhancedClient dynamoDbEnhancedClient;
+
+    @BeforeEach
+    void setUp() {
+        DynamoDbTable<VideoEvent> table = dynamoDbEnhancedClient.table("video_events", TableSchema.fromBean(VideoEvent.class));
+        table.scan().items().forEach(table::deleteItem);
+    }
+
     @Test
     void testSaveAndCountVideoEvents() {
         videoEventRepository.saveVideoEvent(VideoEvent.builder()
+                .viewerId("viewer1")
                 .eventId("123")
                 .collectorTstamp(Instant.now())
                 .build());
 
         videoEventRepository.saveVideoEvent(VideoEvent.builder()
+                .viewerId("viewer2")
                 .eventId("456")
                 .collectorTstamp(Instant.now())
                 .build());

@@ -7,13 +7,13 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 
 public abstract class AWSClientConfig {
 
-  @Value("${aws.credentials.access-key}")
+  @Value("${aws.credentials.access-key:access-key}")
   protected String awsAccessKey;
 
-  @Value("${aws.credentials.secret-key}")
+  @Value("${aws.credentials.secret-key:secret-key}")
   protected String awsSecretKey;
 
-  @Value("${aws.region}")
+  @Value("${aws.region:eu-west-2}")
   protected String awsRegion;
 
   protected AwsCredentialsProvider amazonAWSCredentialsProvider() {

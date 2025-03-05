@@ -22,10 +22,10 @@ sudo systemctl enable containerd.service
 
 # ##############################################
 # required configuration (before running docker)
-compose=compose.yaml
+compose=docker/compose.yaml
 compose_localstack=compose.localstack.yaml
-log Removing file $compose_localstack ...
-rm -f $compose_localstack
+log Removing file docker/$compose_localstack ...
+rm -f docker/$compose_localstack
 log Removing $compose_localstack include from $compose ...
 sed -i "/$compose_localstack/d" $compose
 
@@ -36,12 +36,12 @@ then
   sed -i "s,\(ws://\)\(localhost\),\1$instance_name,g" $frontend_js
 fi
 
-dotenv=.env
+dotenv=docker/.env
 log Removing AWS_ENDPOINT_URL from $dotenv ...
 sed -i '/AWS_ENDPOINT_URL/d' $dotenv
 
 for f in \
-  compose.*.yaml \
+  docker/compose.*.yaml \
   enrich/enrich.hocon \
   snowbridge/config.hcl \
   stream-collector/config.hocon
@@ -56,10 +56,10 @@ newgrp docker <<EOF
 source $this_dir/common.sh
 
 log Building docker images ...
-./build.sh &> /dev/null
+./docker/build.sh &> /dev/null
 
 log Starting docker containers ...
-show_logs=false ./up.sh &> /dev/null
+show_logs=false ./docker/up.sh &> /dev/null
 EOF
 
 # ####

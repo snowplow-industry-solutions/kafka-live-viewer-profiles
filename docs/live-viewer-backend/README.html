@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.23">
+<title>live-viewer-backend</title>
+<link rel="stylesheet" href="./README.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="./rouge-github.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>live-viewer-backend</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#testing">1. Testing</a>
+<ul class="sectlevel2">
+<li><a href="#running-unit-tests">1.1. Running unit tests</a></li>
+<li><a href="#running-integration-tests">1.2. Running integration tests</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph text-center">
+<p><strong><a href="README.pdf">PDF version</a></strong><br>
+<strong>Git commit: df6705d</strong></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="testing"><a class="anchor" href="#testing"></a>1. Testing</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="running-unit-tests"><a class="anchor" href="#running-unit-tests"></a>1.1. Running unit tests</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>It&#8217;s simple (and these tests are also called when building the Docker container). Just type:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>./gradlew clean build</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Maybe <code>KafkaConsumerServiceTest</code> should be considered an integration test.
+But since it runs by automatically creating an <code>EmbeddedKafkaBroker</code> by <code>SpringBootTest</code>, it does not require an active server.
+So, this test runs like any other ordinary unit test.
+</td>
+</tr>
+</table>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="running-integration-tests"><a class="anchor" href="#running-integration-tests"></a>1.2. Running integration tests</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Currently, these are the available integration test classes:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>find <span class="nb">.</span> <span class="nt">-type</span> f <span class="nt">-name</span> <span class="s1">'*IntegrationTest.java'</span>
+<span class="go">./src/test/java/com/snowplowanalytics/liveviewerprofile/service/KafkaConsumerServiceIntegrationTest.java
+./src/test/java/com/snowplowanalytics/liveviewerprofile/repository/VideoEventRepositoryIntegrationTest.java</span></code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="sect3">
+<h4 id="testing-kafkaconsumerserviceintegrationtest"><a class="anchor" href="#testing-kafkaconsumerserviceintegrationtest"></a>1.2.1. Testing <code>KafkaConsumerServiceIntegrationTest</code></h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Start Kafka:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>../docker/compose.sh up kafka-services</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the following command:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span><span class="nv">test_cases</span><span class="o">=</span>KafkaConsumerServiceIntegrationTest ./run-integration-tests.sh</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can pass the <code>--info</code> parameter to this script in order to get more details while running it.
+</td>
+</tr>
+</table>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="testing-videoeventrepositoryintegrationtest"><a class="anchor" href="#testing-videoeventrepositoryintegrationtest"></a>1.2.2. Testing <code>VideoEventRepositoryIntegrationTest</code></h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Start LocalStack:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>../docker/compose.sh up localstack</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the following command:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span><span class="nv">test_cases</span><span class="o">=</span>VideoEventRepositoryIntegrationTest ./run-integration-tests.sh</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="testing-all"><a class="anchor" href="#testing-all"></a>1.2.3. Testing all</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If you already started the services required for each test, you can also type:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">$</span><span class="w"> </span>./run-instegration-tests.sh</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

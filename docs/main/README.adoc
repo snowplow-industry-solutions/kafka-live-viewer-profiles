@@ -1,43 +1,5 @@
-= Snowplow Live Viewer Profile
-Paulo Jeronimo <paulo@oso.sh>
-:experimental:
-:icons: font
-:idprefix:
-:idseparator: -
-:imagesdir: images
-:numbered:
-:sectanchors:
-:source-highlighter: rouge
-:toc: left
-ifdef::backend-pdf[]
-:toc-title!:
-:toc: macro
-endif::[]
-ifdef::backend-html5[]
-:nofooter:
-endif::[]
-// Other attributes
-:snowplow-javascript-tracker-demo: https://github.com/snowplow-incubator/snowplow-javascript-tracker-examples/tree/master/react[Snowplow JavaScript tracker demo app in React] 
-:KafkaUI: https://github.com/kafbat/kafka-ui[Kafka UI]
-:AWS: https://aws.amazon.com[AWS]
-:LocalStack: https://www.localstack.cloud/[LocalStack]
-:LazyDocker: https://github.com/jesseduffield/lazydocker[LazyDocker]
-
-ifdef::backend-pdf[]
-[.text-center]
-*Author: {author} ({email})* +
-*Git commit with doc: {git-commit}* +
-*link:README.html[HTML version]*
-
-****
-toc::[]
-****
-endif::[]
-ifdef::backend-html5[]
-[.text-center]
-*link:README.pdf[PDF version]* +
-*Git commit with doc: {git-commit}*
-endif::[]
+= Kafka Live Viewer Profiles
+include::common/head.adoc[]
 
 == Introduction
 
@@ -69,7 +31,6 @@ Its <<architecture>> is designed so a developer can quickly and easily set up th
 ** In this way, the "behavior-viewer" user can observe the behavior of several users acting as a "video-viewer."
 
 <<<
-
 *Sequence Diagram* for the <<architecture>>:
 
 image:architecture.png[]
@@ -105,7 +66,7 @@ Only a Bash terminal and a Docker installation.
 
 [,console]
 ----
-$ ./up.sh
+$ ./docker/up.sh
 ----
 
 [TIP]
@@ -113,13 +74,13 @@ $ ./up.sh
 ====
 . You can press kbd:[Ctrl+C] at any time. The docker containers will remain running.
 . If there is no file `.env` in the project, this script will try to locate it in a file with the of the project's folder and a extension `.env`.
-.. So, it will copy the file `../snowplow-live-viewer-profile-generator.env` to `.env`.
+.. So, it will copy the file `../{project-name}.env` to `.env`.
 This allows you to call `git clean -fdX` at any time you want without losing your configuration.
-.. If the file `../snowplow-live-viewer-profile-generator.env` does not exists, it will copy the file `.env.example` to `.env` and use it.
+.. If the file `../{project-name}.env` does not exists, it will copy the file `.env.example` to `.env` and use it.
 . You can pass "services" as an argument option to this script. It will list the options you can pass to it by adding the suffix "-services":
 +
 ----
-$ ./up.sh services
+$ ./docker/up.sh services
 apps
 kafka
 localstack
@@ -130,7 +91,7 @@ snowplow
 So, this will start only the kafka services (services listed in `compose.kafka.yaml`):
 +
 ----
-$ ./up.sh kafka-services
+$ ./docker/up.sh kafka-services
 ----
 ====
 
@@ -201,7 +162,7 @@ image:kafka-ui.png[]
 === Step 6 -> (optional) Use {LazyDocker} to monitor the containers and logs
 
 ----
-$ sudo ./lazydocker.sh
+$ ./docker/lazy.sh
 ----
 
 image:lazydocker.png[]
@@ -213,7 +174,7 @@ To stop all the containers, type:
 
 [,console]
 ----
-$ ./down.sh
+$ ./docker/down.sh
 ----
 
 [[step8]]
@@ -223,7 +184,7 @@ To remove all the containers and images, type:
 
 [,console]
 ----
-$ ./clean.sh
+$ ./docker/clean.sh
 ----
 
 [WARNING]

@@ -1,13 +1,5 @@
 = {project-dir}
-:icons: font
-:idprefix:
-:idseparator: -
-:sectanchors:
-:numbered:
-:nofooter:
-ifdef::backend-pdf[]
-:nofooter!:
-endif::[]
+include::common/head.adoc[]
 
 == Testing
 
@@ -15,6 +7,7 @@ endif::[]
 
 . It's simple (and these tests are also called when building the Docker container). Just type:
 +
+[,console]
 ----
 $ ./gradlew clean build
 ----
@@ -27,6 +20,7 @@ So, this test runs like any other ordinary unit test.
 
 . Currently, these are the available integration test classes:
 +
+[,console]
 ----
 $ find . -type f -name '*IntegrationTest.java'
 ./src/test/java/com/snowplowanalytics/liveviewerprofile/service/KafkaConsumerServiceIntegrationTest.java
@@ -37,12 +31,14 @@ $ find . -type f -name '*IntegrationTest.java'
 
 . Start Kafka:
 +
+[,console]
 ----
 $ ../docker/compose.sh up kafka-services
 ----
 +
 . Run the following command:
 +
+[,console]
 ----
 $ test_cases=KafkaConsumerServiceIntegrationTest ./run-integration-tests.sh
 ----
@@ -53,12 +49,14 @@ TIP: You can pass the `--info` parameter to this script in order to get more det
 
 . Start LocalStack:
 +
+[,console]
 ----
 $ ../docker/compose.sh up localstack
 ----
 +
 . Run the following command:
 +
+[,console]
 ----
 $ test_cases=VideoEventRepositoryIntegrationTest ./run-integration-tests.sh
 ----
@@ -67,6 +65,7 @@ $ test_cases=VideoEventRepositoryIntegrationTest ./run-integration-tests.sh
 
 . If you already started the services required for each test, you can also type:
 +
+[,console]
 ----
 $ ./run-instegration-tests.sh
 ----

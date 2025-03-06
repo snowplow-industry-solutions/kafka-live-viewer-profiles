@@ -1,0 +1,71 @@
+= {project-dir}
+include::common/head.adoc[]
+
+== Testing
+
+=== Running unit tests
+
+. It's simple (and these tests are also called when building the Docker container). Just type:
++
+[,console]
+----
+$ ./gradlew clean build
+----
++
+NOTE: Maybe `KafkaConsumerServiceTest` should be considered an integration test.
+But since it runs by automatically creating an `EmbeddedKafkaBroker` by `SpringBootTest`, it does not require an active server.
+So, this test runs like any other ordinary unit test.
+
+=== Running integration tests
+
+. Currently, these are the available integration test classes:
++
+[,console]
+----
+$ find . -type f -name '*IntegrationTest.java'
+./src/test/java/com/snowplowanalytics/liveviewerprofile/service/KafkaConsumerServiceIntegrationTest.java
+./src/test/java/com/snowplowanalytics/liveviewerprofile/repository/VideoEventRepositoryIntegrationTest.java
+----
+
+==== Testing `KafkaConsumerServiceIntegrationTest`
+
+. Start Kafka:
++
+[,console]
+----
+$ ../docker/compose.sh up kafka-services
+----
++
+. Run the following command:
++
+[,console]
+----
+$ test_cases=KafkaConsumerServiceIntegrationTest ./run-integration-tests.sh
+----
++
+TIP: You can pass the `--info` parameter to this script in order to get more details while running it.
+
+==== Testing `VideoEventRepositoryIntegrationTest`
+
+. Start LocalStack:
++
+[,console]
+----
+$ ../docker/compose.sh up localstack
+----
++
+. Run the following command:
++
+[,console]
+----
+$ test_cases=VideoEventRepositoryIntegrationTest ./run-integration-tests.sh
+----
+
+==== Testing all
+
+. If you already started the services required for each test, you can also type:
++
+[,console]
+----
+$ ./run-instegration-tests.sh
+----

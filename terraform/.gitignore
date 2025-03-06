@@ -1,3 +1,4 @@
+.env
 .image-built
 .terraform
 terraform.tfstate
@@ -6,3 +7,4 @@ keypair.pem
 snowplow-demo.zip
 ssh.sh
 terraform.dot
+terraform.png

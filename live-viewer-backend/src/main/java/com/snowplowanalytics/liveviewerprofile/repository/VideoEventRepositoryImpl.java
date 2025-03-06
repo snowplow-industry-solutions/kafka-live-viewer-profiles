@@ -2,6 +2,7 @@ package com.snowplowanalytics.liveviewerprofile.repository;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import com.snowplowanalytics.liveviewerprofile.model.VideoEvent;
@@ -13,6 +14,7 @@ import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 
 @Repository
 @RequiredArgsConstructor
+@Profile("!test-kafka")
 public class VideoEventRepositoryImpl implements VideoEventRepository {
 
     @Autowired

@@ -1,9 +1,5 @@
 = Generating the infrastructure on AWS through Terraform
-:imagesdir: images
-:icons: font
-:source-highlighter: rouge
-:Terraform: https://www.terraform.io/[Terraform]
-:Docker: https://www.docker.com/[Docker]
+include::common/head.adoc[]
 
 == Introduction
 
@@ -11,9 +7,9 @@ The following <<steps>> will allow you to create an infrastructure on AWS and ac
 There is no need to manually install {Terraform}.
 It is executed via {Docker} using the `terraform.sh` script.
 
-To follow these <<steps>>, ensure you have correctly configured the `../.env` file in the root of this project.
+To follow these <<steps>>, ensure you have correctly configured a `./.env` file in terraform's directory.
 
-NOTE: There is a file `../.env.sample`. Copy it to `../.env` and edit the variables accordingly with your environment.
+TIP: If there is a file `../docker/.env` the `terraform.sh` script will use it.
 
 [[steps]]
 == Steps
@@ -23,6 +19,7 @@ NOTE: There is a file `../.env.sample`. Copy it to `../.env` and edit the variab
 
 [,console]
 ----
+$ cd terraform
 $ ./terraform.sh init
 ----
 
@@ -36,18 +33,20 @@ $ ./terraform.sh apply
 [[step3]]
 === Step 3 -> Accessing the EC2 instance that run the apps in AWS
 
+[,console]
 ----
 $ ./apps/ssh.sh
 ----
 
 Inside the EC2 instance, you can control the Docker images in a similar way you do locally:
 
+[,console]
 ----
 $ cd snowplow-demo
 
-$ ./stats.sh # <- show the statistics for the docker containers
-$ ./down.sh # <- stop the docker containers
-$ ./up.sh # <- start the docker containers
+$ ./docker/stats.sh # <- show the statistics for the docker containers
+$ ./docker/down.sh # <- stop the docker containers
+$ ./docker/up.sh # <- start the docker containers
 ----
 
 <<<

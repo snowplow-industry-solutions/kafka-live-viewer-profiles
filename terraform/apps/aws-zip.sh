@@ -13,10 +13,9 @@ log Generating $zip_file ...
 
 rm -f $zip_file
 {
-  find . -maxdepth 1 -name 'compose*.yaml'
-  find . -maxdepth 1 -name '*.sh' ! -name README.sh
   find . \( \
     -name .env -o \
+    -path './docker/*' -o \
     -path './enrich/*' -o \
     -path './iglu-client/*' -o \
     -path './live-viewer-*/*' -o \

@@ -1,0 +1,35 @@
+:experimental:
+:icons: font
+:idprefix:
+:idseparator: -
+:imagesdir: images
+:linkcss:
+:numbered:
+:sectanchors:
+:source-highlighter: rouge
+:stylesheet: README.css
+:toc: left
+ifdef::backend-pdf[]
+:toc-title!:
+:toc: macro
+endif::[]
+ifdef::backend-html5[]
+:nofooter:
+endif::[]
+
+include::attributes.adoc[]
+
+ifdef::backend-pdf[]
+[.text-center]
+*Git commit with doc: {git-commit}* +
+*link:README.html[HTML version]*
+
+****
+toc::[]
+****
+endif::[]
+ifdef::backend-html5[]
+[.text-center]
+*link:README.pdf[PDF version]* +
+*Git commit: {git-commit}*
+endif::[]

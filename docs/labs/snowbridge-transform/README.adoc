@@ -1,11 +1,6 @@
-= README
-:icons: font
-:source-highlighter: rouge
-ifdef::backend-html5[]
-:nofooter:
-:linkcss:
-:stylesheet: README.css
-endif::[]
+= labs/{project-dir}
+include::common/head.adoc[]
+
 :uri-state-machine: link:../../../live-viewer-backend/src/main/java/com/snowplowanalytics/liveviewerprofile/service/VideoStateMachine.java
 
 This lab runs Snowbridge using Docker and a transformation made by the script `script.<number>.js`.

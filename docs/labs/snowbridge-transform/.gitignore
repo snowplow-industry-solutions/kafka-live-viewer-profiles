@@ -1,5 +1,5 @@
 data.tsv*
 events-from*.txt
 output*.txt*
-rouge*.css
 script.js
+common/

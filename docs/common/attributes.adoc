@@ -1,0 +1,8 @@
+:snowplow-javascript-tracker-demo: https://github.com/snowplow-incubator/snowplow-javascript-tracker-examples/tree/master/react[Snowplow JavaScript tracker demo app in React] 
+:project-name: kafka-live-viewer-profiles
+:KafkaUI: https://github.com/kafbat/kafka-ui[Kafka UI]
+:AWS: https://aws.amazon.com[AWS]
+:LocalStack: https://www.localstack.cloud/[LocalStack]
+:LazyDocker: https://github.com/jesseduffield/lazydocker[LazyDocker]
+:Terraform: https://www.terraform.io/[Terraform]
+:Docker: https://www.docker.com/[Docker]

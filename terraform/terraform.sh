@@ -17,9 +17,19 @@ __docker-build() {
 }
 
 __docker-run() {
-  local f=$workspace/.env
-  [ -f "$f" ] || { echo File $f is unavailable. Aborting!; exit 1; }
-  export $(grep ^AWS_ "$f" | xargs)
+  local env_file=.env
+  [ -f "$env_file" ] || {
+    local docker_env_file=../docker/$env_file
+    if [ -f $docker_env_file ]
+    then
+      echo Copying $env_file from $docker_env_file ...
+      cp $docker_env_file $env_file
+    else
+      echo File $env_file is unavailable. Aborting!
+      exit 1
+    fi
+  }
+  export $(grep ^AWS_ "$env_file" | xargs)
   __docker-build
   docker run \
     --rm \

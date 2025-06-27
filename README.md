@@ -4,6 +4,7 @@
 
 [![License][license-image]][license]
 [![Docs][guide-image]][guide-intro]
+[![Snowplow Developer Hub][devhub-image]][devhub-deeplink]
 
 A [Snowplow solution accelerator][solution-accelerators] showing how to build a real-time viewer profile for a video streaming site. Leveraging Snowplow, Apache Kafka and AWS DynamoDB. Written in Java by our friends at [OSO][oso].
 
@@ -43,3 +44,6 @@ limitations under the License.
 
 [guide-intro]: https://docs.snowplow.io/tutorials/kafka-live-viewer-profiles/introduction
 [guide-image]: https://img.shields.io/badge/📚-Documentation-blue
+
+[devhub-deeplink]: https://snowplow.io/solution-accelerators/kafka-live-viewer-profiles
+[devhub-image]: https://img.shields.io/badge/Snowplow-Developer%20Hub-6638f0

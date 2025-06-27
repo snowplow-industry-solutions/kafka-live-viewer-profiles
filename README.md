@@ -1,6 +1,6 @@
 ![snowplow-logo](.github/media/snowplow_solution_accelerators.png)
 
-# Live Viewer Profiles
+# Kafka Live Viewer Profiles
 
 [![License][license-image]][license]
 [![Docs][guide-image]][guide-intro]
@@ -24,7 +24,7 @@ Any issues discovered through the use of this project should be filed as GitHub 
 
 ## Copyright and license
 
-Live Viewer Profiles is copyright 2024-present Snowplow Analytics Ltd.
+Kafka Live Viewer Profiles is copyright 2024-present Snowplow Analytics Ltd.
 
 Licensed under the [Apache License, Version 2.0][license] (the "License");
 you may not use this software except in compliance with the License.
